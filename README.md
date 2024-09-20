@@ -8,7 +8,7 @@ A RESTful API for managing home services build using Go and the Gin framework.
 
 ## Prerequisites
 
-- Go 1.16+
+- Go 1.23+
 - PostgresSQL
 
 ## Installation
