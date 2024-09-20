@@ -1,1 +1,46 @@
 # home-services-api
+
+A RESTful API for managing home services build using Go and the Gin framework.
+
+## features
+
+- keep track of monetary transactions
+
+## Prerequisites
+
+- Go 1.16+
+- PostgresSQL
+
+## Installation
+
+1. clone the repo:
+
+```bash
+git clone https://github.com/dot-slash-ann/home-services-api
+
+cd home-services-api
+```
+
+2. install dependencies
+
+```bash
+go mod download
+```
+
+3. install CompileDaemon
+
+```bash
+go install github.com/githubnemo/CompileDaemon
+```
+
+4. Configure environment variables for your database setup
+
+5. run the app
+
+```bash
+CompileDaemon -command="./home-services-api"
+```
+
+## License
+
+MIT
