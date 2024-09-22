@@ -15,13 +15,11 @@ func init() {
 func main() {
 	router := gin.Default()
 
-	router.GET("transactions", controllers.FindAll)
-	router.GET("transactions/:id", controllers.FindOne)
-	router.POST("transactions", controllers.Create)
-	router.PUT("transactions/:id", controllers.Update)
-	router.DELETE("transactions/:id", controllers.Delete)
+	router.GET("transactions", controllers.FindAllTransactions)
+	router.GET("transactions/:id", controllers.FindOneTransaction)
+	router.POST("transactions", controllers.CreateTransaction)
+	router.PUT("transactions/:id", controllers.UpdateTransaction)
+	router.DELETE("transactions/:id", controllers.DeleteTransaction)
 
 	router.Run()
-
-	// result := countIslands(matrix)
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Create(c *gin.Context) {
+func CreateTransaction(c *gin.Context) {
 	var createTransactionDto dtos.CreateTransactionDto
 
 	if err := json.NewDecoder(c.Request.Body).Decode(&createTransactionDto); err != nil {
@@ -41,7 +41,7 @@ func Create(c *gin.Context) {
 	})
 }
 
-func FindAll(c *gin.Context) {
+func FindAllTransactions(c *gin.Context) {
 	transactions, error := services.TransactionsFindAll()
 
 	if error != nil {
@@ -66,7 +66,7 @@ func FindAll(c *gin.Context) {
 	})
 }
 
-func FindOne(c *gin.Context) {
+func FindOneTransaction(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -96,7 +96,7 @@ func FindOne(c *gin.Context) {
 	})
 }
 
-func Update(c *gin.Context) {
+func UpdateTransaction(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -133,7 +133,7 @@ func Update(c *gin.Context) {
 	})
 }
 
-func Delete(c *gin.Context) {
+func DeleteTransaction(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
