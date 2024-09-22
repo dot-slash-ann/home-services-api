@@ -1,31 +1,33 @@
-package controllers
+package TransactionsController
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
 
-	"github.com/dot-slash-ann/home-services-api/dtos"
-	"github.com/dot-slash-ann/home-services-api/services"
+	TransactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
+	TransactionsService "github.com/dot-slash-ann/home-services-api/services/transactions"
 	"github.com/gin-gonic/gin"
 )
 
-func CreateTransaction(c *gin.Context) {
-	var createTransactionDto dtos.CreateTransactionDto
+func Create(c *gin.Context) {
+	var createTransactionDto TransactionsDto.CreateTransactionDto
 
 	if err := json.NewDecoder(c.Request.Body).Decode(&createTransactionDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error":   "invalid request data",
+			"message": "all date fields must be valid dates in the format yyyy-mm-dd",
+			"code":    400,
 		})
 
 		return
 	}
 
-	transaction, error := services.TransactionsCreate(createTransactionDto)
+	transaction, err := TransactionsService.TransactionsCreate(createTransactionDto)
 
-	if error != nil {
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": error,
+			"error": err,
 		})
 
 		return
@@ -41,16 +43,16 @@ func CreateTransaction(c *gin.Context) {
 	})
 }
 
-func FindAllTransactions(c *gin.Context) {
-	transactions, error := services.TransactionsFindAll()
+func FindAll(c *gin.Context) {
+	transactions, err := TransactionsService.TransactionsFindAll()
 
-	if error != nil {
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{})
 
 		return
 	}
 
-	results := []gin.H{}
+	results := make([]gin.H, 0, len(transactions))
 
 	for _, transaction := range transactions {
 		results = append(results, gin.H{
@@ -66,7 +68,7 @@ func FindAllTransactions(c *gin.Context) {
 	})
 }
 
-func FindOneTransaction(c *gin.Context) {
+func FindOne(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -75,7 +77,7 @@ func FindOneTransaction(c *gin.Context) {
 		return
 	}
 
-	transaction, error := services.TransactionsFindOne(id)
+	transaction, error := TransactionsService.TransactionsFindOne(id)
 
 	log.Default().Println("transaction: ", transaction)
 	log.Default().Println("error: ", error)
@@ -96,7 +98,7 @@ func FindOneTransaction(c *gin.Context) {
 	})
 }
 
-func UpdateTransaction(c *gin.Context) {
+func Update(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -105,7 +107,7 @@ func UpdateTransaction(c *gin.Context) {
 		return
 	}
 
-	var updateTransactionDto dtos.UpdateTransactionDto
+	var updateTransactionDto TransactionsDto.UpdateTransactionDto
 
 	if err := json.NewDecoder(c.Request.Body).Decode(&updateTransactionDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -115,7 +117,7 @@ func UpdateTransaction(c *gin.Context) {
 		return
 	}
 
-	transaction, error := services.TransactionsUpdate(id, updateTransactionDto)
+	transaction, error := TransactionsService.TransactionsUpdate(id, updateTransactionDto)
 
 	if error != nil {
 		c.JSON(http.StatusNotFound, gin.H{})
@@ -133,7 +135,7 @@ func UpdateTransaction(c *gin.Context) {
 	})
 }
 
-func DeleteTransaction(c *gin.Context) {
+func Delete(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -142,7 +144,7 @@ func DeleteTransaction(c *gin.Context) {
 		return
 	}
 
-	transaction, error := services.TransactionsDelete(id)
+	transaction, error := TransactionsService.TransactionsDelete(id)
 
 	if error != nil {
 		c.JSON(http.StatusNotFound, gin.H{})

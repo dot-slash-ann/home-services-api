@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/dot-slash-ann/home-services-api/database"
-	"github.com/dot-slash-ann/home-services-api/entities"
+	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"
 	"github.com/dot-slash-ann/home-services-api/initializers"
 )
 
@@ -12,5 +12,5 @@ func init() {
 }
 
 func main() {
-	database.Database.AutoMigrate(&entities.Transaction{})
+	database.Database.AutoMigrate(&TransactionsEntity.Transaction{})
 }

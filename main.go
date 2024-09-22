@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/dot-slash-ann/home-services-api/controllers"
+	TransactionsController "github.com/dot-slash-ann/home-services-api/controllers/transactions"
 	"github.com/dot-slash-ann/home-services-api/database"
 	"github.com/dot-slash-ann/home-services-api/initializers"
 	"github.com/gin-gonic/gin"
@@ -15,11 +15,11 @@ func init() {
 func main() {
 	router := gin.Default()
 
-	router.GET("transactions", controllers.FindAllTransactions)
-	router.GET("transactions/:id", controllers.FindOneTransaction)
-	router.POST("transactions", controllers.CreateTransaction)
-	router.PUT("transactions/:id", controllers.UpdateTransaction)
-	router.DELETE("transactions/:id", controllers.DeleteTransaction)
+	router.POST("transactions", TransactionsController.Create)
+	router.GET("transactions", TransactionsController.FindAll)
+	router.GET("transactions/:id", TransactionsController.FindOne)
+	router.PUT("transactions/:id", TransactionsController.Update)
+	router.DELETE("transactions/:id", TransactionsController.Delete)
 
 	router.Run()
 }
