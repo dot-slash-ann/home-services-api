@@ -2,7 +2,6 @@ package TransactionsController
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	TransactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
@@ -23,7 +22,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	transaction, err := TransactionsService.TransactionsCreate(createTransactionDto)
+	transaction, err := TransactionsService.Create(createTransactionDto)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -44,7 +43,7 @@ func Create(c *gin.Context) {
 }
 
 func FindAll(c *gin.Context) {
-	transactions, err := TransactionsService.TransactionsFindAll()
+	transactions, err := TransactionsService.FindAll()
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{})
@@ -77,12 +76,9 @@ func FindOne(c *gin.Context) {
 		return
 	}
 
-	transaction, error := TransactionsService.TransactionsFindOne(id)
+	transaction, err := TransactionsService.FindOne(id)
 
-	log.Default().Println("transaction: ", transaction)
-	log.Default().Println("error: ", error)
-
-	if error != nil {
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{})
 
 		return
@@ -117,7 +113,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	transaction, error := TransactionsService.TransactionsUpdate(id, updateTransactionDto)
+	transaction, error := TransactionsService.Update(id, updateTransactionDto)
 
 	if error != nil {
 		c.JSON(http.StatusNotFound, gin.H{})
@@ -144,9 +140,9 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	transaction, error := TransactionsService.TransactionsDelete(id)
+	transaction, err := TransactionsService.Delete(id)
 
-	if error != nil {
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{})
 
 		return

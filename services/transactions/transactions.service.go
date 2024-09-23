@@ -6,31 +6,7 @@ import (
 	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"
 )
 
-func TransactionsFindAll() ([]TransactionsEntity.Transaction, error) {
-	var transactions []TransactionsEntity.Transaction
-
-	results := database.Database.Find(&transactions)
-
-	if results.Error != nil {
-		return []TransactionsEntity.Transaction{}, results.Error
-
-	}
-	return transactions, nil
-}
-
-func TransactionsFindOne(id string) (TransactionsEntity.Transaction, error) {
-	var transaction TransactionsEntity.Transaction
-
-	results := database.Database.First(&transaction, id)
-
-	if results.Error != nil {
-		return TransactionsEntity.Transaction{}, results.Error
-	}
-
-	return transaction, nil
-}
-
-func TransactionsCreate(createTransactionDto TransactionsDto.CreateTransactionDto) (TransactionsEntity.Transaction, error) {
+func Create(createTransactionDto TransactionsDto.CreateTransactionDto) (TransactionsEntity.Transaction, error) {
 	transaction := TransactionsEntity.Transaction{
 		TransactionOn: createTransactionDto.TransactionOn,
 		PostedOn:      createTransactionDto.PostedOn,
@@ -48,35 +24,51 @@ func TransactionsCreate(createTransactionDto TransactionsDto.CreateTransactionDt
 	return transaction, nil
 }
 
-func TransactionsUpdate(id string, updateTransactionDto TransactionsDto.UpdateTransactionDto) (TransactionsEntity.Transaction, error) {
+func FindAll() ([]TransactionsEntity.Transaction, error) {
+	var transactions []TransactionsEntity.Transaction
+
+	results := database.Database.Find(&transactions)
+
+	if results.Error != nil {
+		return []TransactionsEntity.Transaction{}, results.Error
+
+	}
+	return transactions, nil
+}
+
+func FindOne(id string) (TransactionsEntity.Transaction, error) {
 	var transaction TransactionsEntity.Transaction
 
-	result := database.Database.First(&transaction, id)
+	if results := database.Database.First(&transaction, id); results.Error != nil {
+		return TransactionsEntity.Transaction{}, results.Error
+	}
 
-	if result.Error != nil {
+	return transaction, nil
+}
+
+func Update(id string, updateTransactionDto TransactionsDto.UpdateTransactionDto) (TransactionsEntity.Transaction, error) {
+	var transaction TransactionsEntity.Transaction
+
+	if result := database.Database.First(&transaction, id); result.Error != nil {
 		return TransactionsEntity.Transaction{}, result.Error
 	}
 
-	result = database.Database.Model(&transaction).Updates(TransactionsEntity.Transaction{
+	if result := database.Database.Model(&transaction).Updates(TransactionsEntity.Transaction{
 		TransactionOn: updateTransactionDto.TransactionOn,
 		PostedOn:      updateTransactionDto.PostedOn,
 		Amount:        updateTransactionDto.Amount,
 		CategoryId:    updateTransactionDto.CategoryId,
-	})
-
-	if result.Error != nil {
+	}); result.Error != nil {
 		return TransactionsEntity.Transaction{}, result.Error
 	}
 
 	return transaction, nil
 }
 
-func TransactionsDelete(id string) (TransactionsEntity.Transaction, error) {
+func Delete(id string) (TransactionsEntity.Transaction, error) {
 	var transaction TransactionsEntity.Transaction
 
-	result := database.Database.First(&transaction, id)
-
-	if result.Error != nil {
+	if result := database.Database.First(&transaction, id); result.Error != nil {
 		return TransactionsEntity.Transaction{}, result.Error
 	}
 
