@@ -11,7 +11,7 @@ func Create(createCategoryDto CategoriesDto.CreateCategoryDto) (CategoriesEntity
 		Name: createCategoryDto.Name,
 	}
 
-	if result := database.Database.Create(&category); result.Error != nil {
+	if result := database.Connection.Create(&category); result.Error != nil {
 		return CategoriesEntity.Category{}, result.Error
 	}
 
@@ -21,7 +21,7 @@ func Create(createCategoryDto CategoriesDto.CreateCategoryDto) (CategoriesEntity
 func FindAll() ([]CategoriesEntity.Category, error) {
 	var categories []CategoriesEntity.Category
 
-	if results := database.Database.Find(&categories); results.Error != nil {
+	if results := database.Connection.Find(&categories); results.Error != nil {
 		return []CategoriesEntity.Category{}, results.Error
 	}
 
@@ -31,7 +31,7 @@ func FindAll() ([]CategoriesEntity.Category, error) {
 func FindOne(id string) (CategoriesEntity.Category, error) {
 	var category CategoriesEntity.Category
 
-	if result := database.Database.First(&category, id); result.Error != nil {
+	if result := database.Connection.First(&category, id); result.Error != nil {
 		return CategoriesEntity.Category{}, result.Error
 	}
 
@@ -41,11 +41,11 @@ func FindOne(id string) (CategoriesEntity.Category, error) {
 func Update(id string, updateCategoryDto CategoriesDto.UpdateCategoryDto) (CategoriesEntity.Category, error) {
 	var category CategoriesEntity.Category
 
-	if result := database.Database.First(&category, id); result.Error != nil {
+	if result := database.Connection.First(&category, id); result.Error != nil {
 		return CategoriesEntity.Category{}, result.Error
 	}
 
-	if result := database.Database.Model(&category).Updates(CategoriesEntity.Category{
+	if result := database.Connection.Model(&category).Updates(CategoriesEntity.Category{
 		Name: updateCategoryDto.Name,
 	}); result.Error != nil {
 		return CategoriesEntity.Category{}, result.Error
@@ -57,11 +57,11 @@ func Update(id string, updateCategoryDto CategoriesDto.UpdateCategoryDto) (Categ
 func Delete(id string) (CategoriesEntity.Category, error) {
 	var category CategoriesEntity.Category
 
-	if result := database.Database.First(&category, id); result.Error != nil {
+	if result := database.Connection.First(&category, id); result.Error != nil {
 		return CategoriesEntity.Category{}, result.Error
 	}
 
-	database.Database.Delete(&CategoriesEntity.Category{}, id)
+	database.Connection.Delete(&CategoriesEntity.Category{}, id)
 
 	return category, nil
 }

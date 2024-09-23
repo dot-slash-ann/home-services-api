@@ -15,7 +15,7 @@ func Create(createTransactionDto TransactionsDto.CreateTransactionDto) (Transact
 		CategoryId:    createTransactionDto.CategoryId,
 	}
 
-	result := database.Database.Create(&transaction)
+	result := database.Connection.Create(&transaction)
 
 	if result.Error != nil {
 		return TransactionsEntity.Transaction{}, result.Error
@@ -27,7 +27,7 @@ func Create(createTransactionDto TransactionsDto.CreateTransactionDto) (Transact
 func FindAll() ([]TransactionsEntity.Transaction, error) {
 	var transactions []TransactionsEntity.Transaction
 
-	results := database.Database.Find(&transactions)
+	results := database.Connection.Find(&transactions)
 
 	if results.Error != nil {
 		return []TransactionsEntity.Transaction{}, results.Error
@@ -39,7 +39,7 @@ func FindAll() ([]TransactionsEntity.Transaction, error) {
 func FindOne(id string) (TransactionsEntity.Transaction, error) {
 	var transaction TransactionsEntity.Transaction
 
-	if results := database.Database.First(&transaction, id); results.Error != nil {
+	if results := database.Connection.First(&transaction, id); results.Error != nil {
 		return TransactionsEntity.Transaction{}, results.Error
 	}
 
@@ -49,11 +49,11 @@ func FindOne(id string) (TransactionsEntity.Transaction, error) {
 func Update(id string, updateTransactionDto TransactionsDto.UpdateTransactionDto) (TransactionsEntity.Transaction, error) {
 	var transaction TransactionsEntity.Transaction
 
-	if result := database.Database.First(&transaction, id); result.Error != nil {
+	if result := database.Connection.First(&transaction, id); result.Error != nil {
 		return TransactionsEntity.Transaction{}, result.Error
 	}
 
-	if result := database.Database.Model(&transaction).Updates(TransactionsEntity.Transaction{
+	if result := database.Connection.Model(&transaction).Updates(TransactionsEntity.Transaction{
 		TransactionOn: updateTransactionDto.TransactionOn,
 		PostedOn:      updateTransactionDto.PostedOn,
 		Amount:        updateTransactionDto.Amount,
@@ -68,11 +68,11 @@ func Update(id string, updateTransactionDto TransactionsDto.UpdateTransactionDto
 func Delete(id string) (TransactionsEntity.Transaction, error) {
 	var transaction TransactionsEntity.Transaction
 
-	if result := database.Database.First(&transaction, id); result.Error != nil {
+	if result := database.Connection.First(&transaction, id); result.Error != nil {
 		return TransactionsEntity.Transaction{}, result.Error
 	}
 
-	database.Database.Delete(&TransactionsEntity.Transaction{}, id)
+	database.Connection.Delete(&TransactionsEntity.Transaction{}, id)
 
 	return transaction, nil
 }

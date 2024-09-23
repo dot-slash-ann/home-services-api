@@ -13,6 +13,6 @@ func init() {
 }
 
 func main() {
-	database.Database.AutoMigrate(&TransactionsEntity.Transaction{})
-	database.Database.AutoMigrate(&CategoriesEntity.Category{})
+	database.Connection.AutoMigrate(&TransactionsEntity.Transaction{})
+	database.Connection.AutoMigrate(&CategoriesEntity.Category{})
 }
