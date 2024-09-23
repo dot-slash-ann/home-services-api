@@ -6,6 +6,7 @@ A RESTful API for managing home services build using Go and the Gin framework.
 
 - keep track of monetary transactions
 - categorize transactions
+- tag transactions
 
 ## Prerequisites
 
