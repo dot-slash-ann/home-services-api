@@ -2,6 +2,7 @@ package main
 
 import (
 	CategoriesController "github.com/dot-slash-ann/home-services-api/controllers/categories"
+	TagsController "github.com/dot-slash-ann/home-services-api/controllers/tags"
 	TransactionsController "github.com/dot-slash-ann/home-services-api/controllers/transactions"
 	"github.com/dot-slash-ann/home-services-api/database"
 	"github.com/dot-slash-ann/home-services-api/initializers"
@@ -27,6 +28,12 @@ func main() {
 	router.GET("categories/:id", CategoriesController.FindOne)
 	router.PATCH("categories/:id", CategoriesController.Update)
 	router.DELETE("categories/:id", CategoriesController.Delete)
+
+	router.POST("tags", TagsController.Create)
+	router.GET("tags", TagsController.FindAll)
+	router.GET("tags/:id", TagsController.FindOne)
+	router.PATCH("tags/:id", TagsController.Update)
+	router.DELETE("tags/:id", TagsController.Delete)
 
 	router.Run()
 }
