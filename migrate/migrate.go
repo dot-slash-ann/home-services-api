@@ -14,7 +14,7 @@ func init() {
 }
 
 func main() {
-	database.Connection.AutoMigrate(&TransactionsEntity.Transaction{})
 	database.Connection.AutoMigrate(&CategoriesEntity.Category{})
 	database.Connection.AutoMigrate(&TagsEntity.Tag{})
+	database.Connection.AutoMigrate(&TransactionsEntity.Transaction{})
 }

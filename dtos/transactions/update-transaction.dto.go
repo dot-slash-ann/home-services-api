@@ -8,8 +8,8 @@ import (
 type UpdateTransactionDto struct {
 	TransactionOn time.Time `json:"transaction_on"`
 	PostedOn      time.Time `json:"posted_on"`
-	Amount        int       `json:"amount"`
-	CategoryId    int       `json:"category_id"`
+	Amount        uint      `json:"amount"`
+	CategoryId    uint      `json:"category_id"`
 }
 
 func (t *UpdateTransactionDto) UnmarshalJSON(data []byte) error {
