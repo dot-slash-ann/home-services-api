@@ -4,6 +4,7 @@ import (
 	CategoriesController "github.com/dot-slash-ann/home-services-api/controllers/categories"
 	TagsController "github.com/dot-slash-ann/home-services-api/controllers/tags"
 	TransactionsController "github.com/dot-slash-ann/home-services-api/controllers/transactions"
+	UsersController "github.com/dot-slash-ann/home-services-api/controllers/users"
 	"github.com/dot-slash-ann/home-services-api/database"
 	"github.com/dot-slash-ann/home-services-api/initializers"
 	"github.com/gin-gonic/gin"
@@ -34,6 +35,8 @@ func main() {
 	router.GET("tags/:id", TagsController.FindOne)
 	router.PATCH("tags/:id", TagsController.Update)
 	router.DELETE("tags/:id", TagsController.Delete)
+
+	router.POST("signup", UsersController.SignUp)
 
 	router.Run()
 }

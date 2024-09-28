@@ -5,6 +5,7 @@ import (
 	CategoriesEntity "github.com/dot-slash-ann/home-services-api/entities/categories"
 	TagsEntity "github.com/dot-slash-ann/home-services-api/entities/tags"
 	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"
+	UserEntity "github.com/dot-slash-ann/home-services-api/entities/users"
 	"github.com/dot-slash-ann/home-services-api/initializers"
 )
 
@@ -17,4 +18,6 @@ func main() {
 	database.Connection.AutoMigrate(&CategoriesEntity.Category{})
 	database.Connection.AutoMigrate(&TagsEntity.Tag{})
 	database.Connection.AutoMigrate(&TransactionsEntity.Transaction{})
+
+	database.Connection.AutoMigrate(&UserEntity.User{})
 }
