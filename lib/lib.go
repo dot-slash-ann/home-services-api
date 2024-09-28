@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func HandleError(c *gin.Context, status int, err error) {
@@ -49,4 +50,12 @@ func HandleShouldBind(c *gin.Context, dto interface{}) bool {
 	}
 
 	return true
+}
+
+func HandleDatabaseError(result *gorm.DB) error {
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }

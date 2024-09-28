@@ -5,7 +5,7 @@ import (
 
 	"github.com/dot-slash-ann/home-services-api/database"
 	TransactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
-	"gorm.io/gorm"
+	"github.com/dot-slash-ann/home-services-api/lib"
 
 	CategoriesEntity "github.com/dot-slash-ann/home-services-api/entities/categories"
 	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"
@@ -13,16 +13,8 @@ import (
 	CategoriesService "github.com/dot-slash-ann/home-services-api/services/categories"
 )
 
-func handleDatabaseError(result *gorm.DB) error {
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
-
 func preloadTransaction(transaction *TransactionsEntity.Transaction, id string) error {
-	return handleDatabaseError(database.Connection.Preload("Category").First(transaction, id))
+	return lib.HandleDatabaseError(database.Connection.Preload("Category").First(transaction, id))
 }
 
 func findCategory(categoryId uint) (CategoriesEntity.Category, error) {
@@ -50,7 +42,7 @@ func Create(createTransactionDto TransactionsDto.CreateTransactionDto) (Transact
 		CategoryID:    category.ID,
 	}
 
-	if err := handleDatabaseError(database.Connection.Create(&transaction)); err != nil {
+	if err := lib.HandleDatabaseError(database.Connection.Create(&transaction)); err != nil {
 		return TransactionsEntity.Transaction{}, err
 	}
 
@@ -64,7 +56,7 @@ func Create(createTransactionDto TransactionsDto.CreateTransactionDto) (Transact
 func FindAll() ([]TransactionsEntity.Transaction, error) {
 	var transactions []TransactionsEntity.Transaction
 
-	if err := handleDatabaseError(database.Connection.Model(&TransactionsEntity.Transaction{}).Preload("Category").Find(&transactions)); err != nil {
+	if err := lib.HandleDatabaseError(database.Connection.Model(&TransactionsEntity.Transaction{}).Preload("Category").Find(&transactions)); err != nil {
 		return []TransactionsEntity.Transaction{}, err
 
 	}
@@ -84,7 +76,7 @@ func FindOne(id string) (TransactionsEntity.Transaction, error) {
 func Update(id string, updateTransactionDto TransactionsDto.UpdateTransactionDto) (TransactionsEntity.Transaction, error) {
 	var transaction TransactionsEntity.Transaction
 
-	if err := handleDatabaseError(database.Connection.First(&transaction, id)); err != nil {
+	if err := lib.HandleDatabaseError(database.Connection.First(&transaction, id)); err != nil {
 		return TransactionsEntity.Transaction{}, err
 	}
 
@@ -100,7 +92,7 @@ func Update(id string, updateTransactionDto TransactionsDto.UpdateTransactionDto
 		CategoryID:    category.ID,
 	}
 
-	if err := handleDatabaseError(database.Connection.Model(&transaction).Updates(updatedTransaction)); err != nil {
+	if err := lib.HandleDatabaseError(database.Connection.Model(&transaction).Updates(updatedTransaction)); err != nil {
 		return TransactionsEntity.Transaction{}, err
 	}
 
@@ -118,7 +110,7 @@ func Delete(id string) (TransactionsEntity.Transaction, error) {
 		return TransactionsEntity.Transaction{}, err
 	}
 
-	if err := handleDatabaseError(database.Connection.Delete(&TransactionsEntity.Transaction{}, id)); err != nil {
+	if err := lib.HandleDatabaseError(database.Connection.Delete(&TransactionsEntity.Transaction{}, id)); err != nil {
 		return TransactionsEntity.Transaction{}, err
 	}
 
