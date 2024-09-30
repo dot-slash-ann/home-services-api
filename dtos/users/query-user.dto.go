@@ -11,3 +11,13 @@ func UserToJson(user UsersEntity.User) gin.H {
 		"email": user.Email,
 	}
 }
+
+func ManyUsersToJson(users []UsersEntity.User) []gin.H {
+	results := make([]gin.H, 0, len(users))
+
+	for _, user := range users {
+		results = append(results, UserToJson(user))
+	}
+
+	return results
+}
