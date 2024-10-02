@@ -1,40 +1,61 @@
-package TransactionsService
+package transactions
 
 import (
 	"fmt"
 
-	"github.com/dot-slash-ann/home-services-api/database"
 	TransactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
 	"github.com/dot-slash-ann/home-services-api/lib"
+	"gorm.io/gorm"
 
-	CategoriesEntity "github.com/dot-slash-ann/home-services-api/entities/categories"
-	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"
+	"github.com/dot-slash-ann/home-services-api/entities/transactions"
 
-	CategoriesService "github.com/dot-slash-ann/home-services-api/services/categories"
+	"github.com/dot-slash-ann/home-services-api/services/categories"
 )
 
-func preloadTransaction(transaction *TransactionsEntity.Transaction, id string) error {
-	return lib.HandleDatabaseError(database.Connection.Preload("Category").First(transaction, id))
+type TransactionsService interface {
+	Create(TransactionsDto.CreateTransactionDto) (transactions.Transaction, error)
+	FindAll() ([]transactions.Transaction, error)
+	FindOne(string) (transactions.Transaction, error)
+	Update(string, TransactionsDto.UpdateTransactionDto) (transactions.Transaction, error)
+	Delete(string) (transactions.Transaction, error)
 }
 
-func findCategory(categoryId uint) (CategoriesEntity.Category, error) {
-	category, err := CategoriesService.FindOne(fmt.Sprint(categoryId))
-
-	if err != nil {
-		return CategoriesEntity.Category{}, err
-	}
-
-	return category, nil
+type TransactionsServiceImpl struct {
+	database          *gorm.DB
+	categoriesService categories.CategoriesService
 }
 
-func Create(createTransactionDto TransactionsDto.CreateTransactionDto) (TransactionsEntity.Transaction, error) {
-	category, err := CategoriesService.FindOne(fmt.Sprint(createTransactionDto.CategoryId))
+func NewTransactionsService(database *gorm.DB, categoriesService categories.CategoriesService) *TransactionsServiceImpl {
+	return &TransactionsServiceImpl{
+		database:          database,
+		categoriesService: categoriesService,
+	}
+}
+
+// func preloadTransaction(service *TransactionsServiceImpl, transaction *transactions.Transaction, id string) error {
+// 	return lib.HandleDatabaseError(service.database.Preload("Category").First(transaction, id))
+// }
+
+// func findCategory(categoryId uint) (CategoriesEntity.Category, error) {
+// 	categoriesService := categories.NewCategoriesService(*&gorm.DB{})
+
+// 	category, err := categoriesService.FindOne(fmt.Sprint(categoryId))
+
+// 	if err != nil {
+// 		return CategoriesEntity.Category{}, err
+// 	}
+
+// 	return category, nil
+// }
+
+func (service *TransactionsServiceImpl) Create(createTransactionDto TransactionsDto.CreateTransactionDto) (transactions.Transaction, error) {
+	category, err := service.FindOne(fmt.Sprint(createTransactionDto.CategoryId))
 
 	if err != nil {
-		return TransactionsEntity.Transaction{}, err
+		return transactions.Transaction{}, err
 	}
 
-	transaction := TransactionsEntity.Transaction{
+	transaction := transactions.Transaction{
 		TransactionOn: createTransactionDto.TransactionOn,
 		PostedOn:      createTransactionDto.PostedOn,
 		Amount:        createTransactionDto.Amount,
@@ -42,76 +63,79 @@ func Create(createTransactionDto TransactionsDto.CreateTransactionDto) (Transact
 		CategoryID:    category.ID,
 	}
 
-	if err := lib.HandleDatabaseError(database.Connection.Create(&transaction)); err != nil {
-		return TransactionsEntity.Transaction{}, err
+	if err := lib.HandleDatabaseError(service.database.Create(&transaction)); err != nil {
+		return transactions.Transaction{}, err
 	}
 
-	if err := preloadTransaction(&transaction, fmt.Sprint(transaction.ID)); err != nil {
-		return TransactionsEntity.Transaction{}, err
-	}
-
-	return transaction, nil
-}
-
-func FindAll() ([]TransactionsEntity.Transaction, error) {
-	var transactions []TransactionsEntity.Transaction
-
-	if err := lib.HandleDatabaseError(database.Connection.Model(&TransactionsEntity.Transaction{}).Preload("Category").Find(&transactions)); err != nil {
-		return []TransactionsEntity.Transaction{}, err
-
-	}
-	return transactions, nil
-}
-
-func FindOne(id string) (TransactionsEntity.Transaction, error) {
-	var transaction TransactionsEntity.Transaction
-
-	if err := preloadTransaction(&transaction, id); err != nil {
-		return TransactionsEntity.Transaction{}, err
+	if err := lib.HandleDatabaseError(service.database.Preload("Category").First(&transaction, fmt.Sprint(transaction.ID))); err != nil {
+		return transactions.Transaction{}, err
 	}
 
 	return transaction, nil
 }
 
-func Update(id string, updateTransactionDto TransactionsDto.UpdateTransactionDto) (TransactionsEntity.Transaction, error) {
-	var transaction TransactionsEntity.Transaction
+func (service *TransactionsServiceImpl) FindAll() ([]transactions.Transaction, error) {
+	var transactionsList []transactions.Transaction
 
-	if err := lib.HandleDatabaseError(database.Connection.First(&transaction, id)); err != nil {
-		return TransactionsEntity.Transaction{}, err
+	if err := lib.HandleDatabaseError(service.database.Model(&transactions.Transaction{}).Preload("Category").Find(&transactionsList)); err != nil {
+		return []transactions.Transaction{}, err
+
+	}
+	return transactionsList, nil
+}
+
+func (service *TransactionsServiceImpl) FindOne(id string) (transactions.Transaction, error) {
+	var transaction transactions.Transaction
+
+	if err := lib.HandleDatabaseError(service.database.Preload("Category").First(&transaction, id)); err != nil {
+		return transactions.Transaction{}, err
 	}
 
-	category, err := findCategory(updateTransactionDto.CategoryId)
+	return transaction, nil
+}
+
+func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto TransactionsDto.UpdateTransactionDto) (transactions.Transaction, error) {
+	var transaction transactions.Transaction
+
+	if err := lib.HandleDatabaseError(service.database.First(&transaction, id)); err != nil {
+		return transactions.Transaction{}, err
+	}
+
+	categoriesService := categories.NewCategoriesService(service.database)
+
+	category, err := categoriesService.FindOne(fmt.Sprint(updateTransactionDto.CategoryId))
+
 	if err != nil {
-		return TransactionsEntity.Transaction{}, err
+		return transactions.Transaction{}, err
 	}
 
-	updatedTransaction := TransactionsEntity.Transaction{
+	updatedTransaction := transactions.Transaction{
 		TransactionOn: updateTransactionDto.TransactionOn,
 		PostedOn:      updateTransactionDto.PostedOn,
 		Amount:        updateTransactionDto.Amount,
 		CategoryID:    category.ID,
 	}
 
-	if err := lib.HandleDatabaseError(database.Connection.Model(&transaction).Updates(updatedTransaction)); err != nil {
-		return TransactionsEntity.Transaction{}, err
+	if err := lib.HandleDatabaseError(service.database.Model(&transaction).Updates(updatedTransaction)); err != nil {
+		return transactions.Transaction{}, err
 	}
 
-	if err := preloadTransaction(&transaction, fmt.Sprint(transaction.ID)); err != nil {
-		return TransactionsEntity.Transaction{}, err
+	if err := lib.HandleDatabaseError(service.database.Preload("Category").First(&transaction, fmt.Sprint(transaction.ID))); err != nil {
+		return transactions.Transaction{}, err
 	}
 
 	return transaction, nil
 }
 
-func Delete(id string) (TransactionsEntity.Transaction, error) {
-	var transaction TransactionsEntity.Transaction
+func (service *TransactionsServiceImpl) Delete(id string) (transactions.Transaction, error) {
+	var transaction transactions.Transaction
 
-	if err := preloadTransaction(&transaction, id); err != nil {
-		return TransactionsEntity.Transaction{}, err
+	if err := lib.HandleDatabaseError(service.database.Preload("Category").First(&transaction, id)); err != nil {
+		return transactions.Transaction{}, err
 	}
 
-	if err := lib.HandleDatabaseError(database.Connection.Delete(&TransactionsEntity.Transaction{}, id)); err != nil {
-		return TransactionsEntity.Transaction{}, err
+	if err := lib.HandleDatabaseError(service.database.Delete(&transactions.Transaction{}, id)); err != nil {
+		return transactions.Transaction{}, err
 	}
 
 	return transaction, nil

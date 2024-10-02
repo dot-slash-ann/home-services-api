@@ -1,4 +1,4 @@
-package CategoriesEntity
+package categories
 
 import "gorm.io/gorm"
 

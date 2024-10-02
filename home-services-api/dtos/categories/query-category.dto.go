@@ -1,4 +1,4 @@
-package CategoriesDto
+package categories
 
 import (
 	CategoriesEntity "github.com/dot-slash-ann/home-services-api/entities/categories"

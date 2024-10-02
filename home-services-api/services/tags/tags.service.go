@@ -1,67 +1,85 @@
-package TagsService
+package tags
 
 import (
-	"github.com/dot-slash-ann/home-services-api/database"
-	TagsDto "github.com/dot-slash-ann/home-services-api/dtos/tags"
-	TagsEntity "github.com/dot-slash-ann/home-services-api/entities/tags"
+	tagsDto "github.com/dot-slash-ann/home-services-api/dtos/tags"
+	"github.com/dot-slash-ann/home-services-api/entities/tags"
+	"gorm.io/gorm"
 )
 
-func Create(createTagDto TagsDto.CreateTagDto) (TagsEntity.Tag, error) {
-	tag := TagsEntity.Tag{
+type TagsService interface {
+	Create(tagsDto.CreateTagDto) (tags.Tag, error)
+	FindAll() ([]tags.Tag, error)
+	FindOne(string) (tags.Tag, error)
+	Update(string, tagsDto.UpdateTagDto) (tags.Tag, error)
+	Delete(string) (tags.Tag, error)
+}
+
+type TagsServiceImpl struct {
+	database *gorm.DB
+}
+
+func NewTagsService(database *gorm.DB) *TagsServiceImpl {
+	return &TagsServiceImpl{
+		database: database,
+	}
+}
+
+func (service *TagsServiceImpl) Create(createTagDto tagsDto.CreateTagDto) (tags.Tag, error) {
+	tag := tags.Tag{
 		Name: createTagDto.Name,
 	}
 
-	if result := database.Connection.Create(&tag); result.Error != nil {
-		return TagsEntity.Tag{}, result.Error
+	if result := service.database.Create(&tag); result.Error != nil {
+		return tags.Tag{}, result.Error
 	}
 
 	return tag, nil
 }
 
-func FindAll() ([]TagsEntity.Tag, error) {
-	var tags []TagsEntity.Tag
+func (service *TagsServiceImpl) FindAll() ([]tags.Tag, error) {
+	var tagList []tags.Tag
 
-	if results := database.Connection.Find(&tags); results.Error != nil {
-		return []TagsEntity.Tag{}, results.Error
+	if results := service.database.Find(&tagList); results.Error != nil {
+		return []tags.Tag{}, results.Error
 	}
 
-	return tags, nil
+	return tagList, nil
 }
 
-func FindOne(id string) (TagsEntity.Tag, error) {
-	var tag TagsEntity.Tag
+func (service *TagsServiceImpl) FindOne(id string) (tags.Tag, error) {
+	var tag tags.Tag
 
-	if result := database.Connection.First(&tag, id); result.Error != nil {
-		return TagsEntity.Tag{}, result.Error
+	if result := service.database.First(&tag, id); result.Error != nil {
+		return tags.Tag{}, result.Error
 	}
 
 	return tag, nil
 }
 
-func Update(id string, updateTagDto TagsDto.UpdateTagDto) (TagsEntity.Tag, error) {
-	var tag TagsEntity.Tag
+func (service *TagsServiceImpl) Update(id string, updateTagDto tagsDto.UpdateTagDto) (tags.Tag, error) {
+	var tag tags.Tag
 
-	if result := database.Connection.First(&tag, id); result.Error != nil {
-		return TagsEntity.Tag{}, result.Error
+	if result := service.database.First(&tag, id); result.Error != nil {
+		return tags.Tag{}, result.Error
 	}
 
-	if result := database.Connection.Model(&tag).Updates(TagsEntity.Tag{
+	if result := service.database.Model(&tag).Updates(tags.Tag{
 		Name: updateTagDto.Name,
 	}); result.Error != nil {
-		return TagsEntity.Tag{}, result.Error
+		return tags.Tag{}, result.Error
 	}
 
 	return tag, nil
 }
 
-func Delete(id string) (TagsEntity.Tag, error) {
-	var tag TagsEntity.Tag
+func (service *TagsServiceImpl) Delete(id string) (tags.Tag, error) {
+	var tag tags.Tag
 
-	if result := database.Connection.First(&tag, id); result.Error != nil {
-		return TagsEntity.Tag{}, result.Error
+	if result := service.database.First(&tag, id); result.Error != nil {
+		return tags.Tag{}, result.Error
 	}
 
-	database.Connection.Delete(&TagsEntity.Tag{}, id)
+	service.database.Delete(&tags.Tag{}, id)
 
 	return tag, nil
 }

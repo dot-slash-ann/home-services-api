@@ -1,27 +1,35 @@
-package TagsController
+package tags
 
 import (
 	"net/http"
 
-	TagsDto "github.com/dot-slash-ann/home-services-api/dtos/tags"
-	TagsService "github.com/dot-slash-ann/home-services-api/services/tags"
+	tagsDto "github.com/dot-slash-ann/home-services-api/dtos/tags"
+	"github.com/dot-slash-ann/home-services-api/services/tags"
 	"github.com/gin-gonic/gin"
 )
 
-func Create(c *gin.Context) {
-	var createTagDto TagsDto.CreateTagDto
+type TagsController struct {
+	tagsService tags.TagsService
+}
+
+func NewTagsController(service tags.TagsService) *TagsController {
+	return &TagsController{
+		tagsService: service,
+	}
+}
+
+func (controller *TagsController) Create(c *gin.Context) {
+	var createTagDto tagsDto.CreateTagDto
 
 	if err := c.ShouldBind(&createTagDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "invalid request data",
-			"message": "expected request body",
-			"code":    400,
+			"error": err,
 		})
 
 		return
 	}
 
-	tag, err := TagsService.Create(createTagDto)
+	tag, err := controller.tagsService.Create(createTagDto)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -39,12 +47,11 @@ func Create(c *gin.Context) {
 	})
 }
 
-func FindAll(c *gin.Context) {
-	tags, err := TagsService.FindAll()
+func (controller *TagsController) FindAll(c *gin.Context) {
+	tags, err := controller.tagsService.FindAll()
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{})
-
+		//
 		return
 	}
 
@@ -62,7 +69,7 @@ func FindAll(c *gin.Context) {
 	})
 }
 
-func FindOne(c *gin.Context) {
+func (controller *TagsController) FindOne(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -71,7 +78,7 @@ func FindOne(c *gin.Context) {
 		return
 	}
 
-	tag, err := TagsService.FindOne(id)
+	tag, err := controller.tagsService.FindOne(id)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{})
@@ -87,7 +94,7 @@ func FindOne(c *gin.Context) {
 	})
 }
 
-func Update(c *gin.Context) {
+func (controller *TagsController) Update(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -96,7 +103,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	var updateTagDto TagsDto.UpdateTagDto
+	var updateTagDto tagsDto.UpdateTagDto
 
 	if err := c.ShouldBind(&updateTagDto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -108,7 +115,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	tag, err := TagsService.Update(id, updateTagDto)
+	tag, err := controller.tagsService.Update(id, updateTagDto)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -126,7 +133,7 @@ func Update(c *gin.Context) {
 	})
 }
 
-func Delete(c *gin.Context) {
+func (controller *TagsController) Delete(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -135,7 +142,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	tag, err := TagsService.Delete(id)
+	tag, err := controller.tagsService.Delete(id)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{})
@@ -143,7 +150,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"data": gin.H{
 			"id":   tag.ID,
 			"name": tag.Name,

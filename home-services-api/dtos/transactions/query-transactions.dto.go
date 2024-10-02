@@ -1,4 +1,4 @@
-package TransactionsDto
+package transactions
 
 import (
 	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"

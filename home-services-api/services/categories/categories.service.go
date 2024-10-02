@@ -1,71 +1,90 @@
-package CategoriesService
+package categories
 
 import (
 	"github.com/dot-slash-ann/home-services-api/database"
-	CategoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
-	CategoriesEntity "github.com/dot-slash-ann/home-services-api/entities/categories"
+	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
+	"github.com/dot-slash-ann/home-services-api/entities/categories"
 	"github.com/dot-slash-ann/home-services-api/lib"
+	"gorm.io/gorm"
 )
 
-func Create(createCategoryDto CategoriesDto.CreateCategoryDto) (CategoriesEntity.Category, error) {
-	category := CategoriesEntity.Category{
+type CategoriesService interface {
+	Create(categoriesDto.CreateCategoryDto) (categories.Category, error)
+	FindAll() ([]categories.Category, error)
+	FindOne(string) (categories.Category, error)
+	Update(string, categoriesDto.UpdateCategoryDto) (categories.Category, error)
+	Delete(string) (categories.Category, error)
+}
+
+type CategoriesServiceImpl struct {
+	database *gorm.DB
+}
+
+func NewCategoriesService(database *gorm.DB) *CategoriesServiceImpl {
+	return &CategoriesServiceImpl{
+		database: database,
+	}
+}
+
+func (service *CategoriesServiceImpl) Create(createCategoryDto categoriesDto.CreateCategoryDto) (categories.Category, error) {
+	category := categories.Category{
 		Name: createCategoryDto.Name,
 	}
 
 	if err := lib.HandleDatabaseError(database.Connection.Create(&category)); err != nil {
-		return CategoriesEntity.Category{}, err
+		return categories.Category{}, err
 	}
 
 	return category, nil
 }
 
-func FindAll() ([]CategoriesEntity.Category, error) {
-	var categories []CategoriesEntity.Category
+func (service *CategoriesServiceImpl) FindAll() ([]categories.Category, error) {
+	var categoriesList []categories.Category
 
-	if err := lib.HandleDatabaseError(database.Connection.Find(&categories)); err != nil {
-		return []CategoriesEntity.Category{}, err
+	if err := lib.HandleDatabaseError(database.Connection.Find(&categoriesList)); err != nil {
+		return []categories.Category{}, err
 	}
 
-	return categories, nil
+	return categoriesList, nil
 }
 
-func FindOne(id string) (CategoriesEntity.Category, error) {
-	var category CategoriesEntity.Category
+func (service *CategoriesServiceImpl) FindOne(id string) (categories.Category, error) {
+	var category categories.Category
 
 	if err := lib.HandleDatabaseError(database.Connection.First(&category, id)); err != nil {
-		return CategoriesEntity.Category{}, err
+		return categories.Category{}, err
 	}
 
 	return category, nil
 }
 
-func Update(id string, updateCategoryDto CategoriesDto.UpdateCategoryDto) (CategoriesEntity.Category, error) {
-	var category CategoriesEntity.Category
+func (service *CategoriesServiceImpl) Update(id string, updateCategoryDto categoriesDto.UpdateCategoryDto) (categories.Category, error) {
+	var category categories.Category
 
-	updatedCategory := CategoriesEntity.Category{
+	updatedCategory := categories.Category{
 		Name: updateCategoryDto.Name,
 	}
 
 	if err := lib.HandleDatabaseError(database.Connection.First(&category, id)); err != nil {
-		return CategoriesEntity.Category{}, err
+		return categories.Category{}, err
 	}
 
 	if err := lib.HandleDatabaseError(database.Connection.Model(&category).Updates(updatedCategory)); err != nil {
-		return CategoriesEntity.Category{}, err
+		return categories.Category{}, err
 	}
 
 	return category, nil
 }
 
-func Delete(id string) (CategoriesEntity.Category, error) {
-	var category CategoriesEntity.Category
+func (service *CategoriesServiceImpl) Delete(id string) (categories.Category, error) {
+	var category categories.Category
 
 	if err := lib.HandleDatabaseError(database.Connection.First(&category, id)); err != nil {
-		return CategoriesEntity.Category{}, err
+		return categories.Category{}, err
 	}
 
-	if err := lib.HandleDatabaseError(database.Connection.Delete(&CategoriesEntity.Category{}, id)); err != nil {
-		return CategoriesEntity.Category{}, err
+	if err := lib.HandleDatabaseError(database.Connection.Delete(&categories.Category{}, id)); err != nil {
+		return categories.Category{}, err
 	}
 
 	return category, nil

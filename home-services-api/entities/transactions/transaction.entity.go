@@ -1,4 +1,4 @@
-package TransactionsEntity
+package transactions
 
 import (
 	"time"

@@ -1,4 +1,4 @@
-package TransactionsDto
+package transactions
 
 import (
 	"encoding/json"
