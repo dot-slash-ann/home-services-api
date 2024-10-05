@@ -1,6 +1,7 @@
 package transactions
 
 import (
+	"errors"
 	"fmt"
 
 	TransactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
@@ -11,7 +12,7 @@ import (
 
 type TransactionsService interface {
 	Create(TransactionsDto.CreateTransactionDto) (transactions.Transaction, error)
-	FindAll() ([]transactions.Transaction, error)
+	FindAll(map[string]string) ([]transactions.Transaction, error)
 	FindOne(string) (transactions.Transaction, error)
 	Update(string, TransactionsDto.UpdateTransactionDto) (transactions.Transaction, error)
 	Delete(string) (transactions.Transaction, error)
@@ -55,10 +56,24 @@ func (service *TransactionsServiceImpl) Create(createTransactionDto Transactions
 	return transaction, nil
 }
 
-func (service *TransactionsServiceImpl) FindAll() ([]transactions.Transaction, error) {
+func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]transactions.Transaction, error) {
 	var transactionsList []transactions.Transaction
 
-	if result := service.database.Model(&transactions.Transaction{}).Preload("Category").Find(&transactionsList); result.Error != nil {
+	query := service.database.Model(&transactions.Transaction{}).Preload("Category")
+
+	if categoryName, ok := filters["category"]; ok && categoryName != "" {
+		category, err := service.categoriesService.FindByName(categoryName)
+
+		if err != nil {
+			return []transactions.Transaction{}, err
+		}
+
+		query.Where("category_id = ?", category.ID)
+	} else if categoryName != "" {
+		return []transactions.Transaction{}, errors.New("category does not exist")
+	}
+
+	if result := query.Find(&transactionsList); result.Error != nil {
 		return []transactions.Transaction{}, result.Error
 
 	}
@@ -82,9 +97,7 @@ func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto T
 		return transactions.Transaction{}, result.Error
 	}
 
-	categoriesService := categories.NewCategoriesService(service.database)
-
-	category, err := categoriesService.FindOne(fmt.Sprint(updateTransactionDto.CategoryId))
+	category, err := service.categoriesService.FindOne(fmt.Sprint(updateTransactionDto.CategoryId))
 
 	if err != nil {
 		return transactions.Transaction{}, err

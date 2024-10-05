@@ -10,6 +10,7 @@ type CategoriesService interface {
 	Create(categoriesDto.CreateCategoryDto) (categories.Category, error)
 	FindAll() ([]categories.Category, error)
 	FindOne(string) (categories.Category, error)
+	FindByName(string) (categories.Category, error)
 	Update(string, categoriesDto.UpdateCategoryDto) (categories.Category, error)
 	Delete(string) (categories.Category, error)
 }
@@ -50,6 +51,16 @@ func (service *CategoriesServiceImpl) FindOne(id string) (categories.Category, e
 	var category categories.Category
 
 	if result := service.database.First(&category, id); result.Error != nil {
+		return categories.Category{}, result.Error
+	}
+
+	return category, nil
+}
+
+func (service *CategoriesServiceImpl) FindByName(name string) (categories.Category, error) {
+	var category categories.Category
+
+	if result := service.database.First(&category, "name = ?", name); result.Error != nil {
 		return categories.Category{}, result.Error
 	}
 

@@ -44,9 +44,13 @@ func (controller *TransactionsController) Create(c *gin.Context) {
 }
 
 func (controller *TransactionsController) FindAll(c *gin.Context) {
-	transactions, err := controller.transactionsService.FindAll()
+	// tags := c.Query("tags")
+	category := c.Query("category")
 
-	// TODO: this is a bad response code
+	transactions, err := controller.transactionsService.FindAll(map[string]string{
+		"category": category,
+	})
+
 	if err != nil {
 		httpErr := httpErrors.InternalServerError(err, nil)
 
