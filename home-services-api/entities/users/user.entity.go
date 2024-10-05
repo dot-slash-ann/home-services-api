@@ -1,9 +1,10 @@
-package UsersEntity
+package users
 
 import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Email    string `gorm:"unique"`
-	Password string
+	Email        string `gorm:"unique"`
+	Password     string
+	SessionToken string
 }

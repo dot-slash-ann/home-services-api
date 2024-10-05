@@ -1,4 +1,4 @@
-package UsersDto
+package users
 
 import (
 	UsersEntity "github.com/dot-slash-ann/home-services-api/entities/users"

@@ -1,10 +1,8 @@
 package categories
 
 import (
-	"github.com/dot-slash-ann/home-services-api/database"
 	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
 	"github.com/dot-slash-ann/home-services-api/entities/categories"
-	"github.com/dot-slash-ann/home-services-api/lib"
 	"gorm.io/gorm"
 )
 
@@ -31,8 +29,8 @@ func (service *CategoriesServiceImpl) Create(createCategoryDto categoriesDto.Cre
 		Name: createCategoryDto.Name,
 	}
 
-	if err := lib.HandleDatabaseError(database.Connection.Create(&category)); err != nil {
-		return categories.Category{}, err
+	if result := service.database.Create(&category); result.Error != nil {
+		return categories.Category{}, result.Error
 	}
 
 	return category, nil
@@ -41,8 +39,8 @@ func (service *CategoriesServiceImpl) Create(createCategoryDto categoriesDto.Cre
 func (service *CategoriesServiceImpl) FindAll() ([]categories.Category, error) {
 	var categoriesList []categories.Category
 
-	if err := lib.HandleDatabaseError(database.Connection.Find(&categoriesList)); err != nil {
-		return []categories.Category{}, err
+	if result := service.database.Find(&categoriesList); result.Error != nil {
+		return []categories.Category{}, result.Error
 	}
 
 	return categoriesList, nil
@@ -51,8 +49,8 @@ func (service *CategoriesServiceImpl) FindAll() ([]categories.Category, error) {
 func (service *CategoriesServiceImpl) FindOne(id string) (categories.Category, error) {
 	var category categories.Category
 
-	if err := lib.HandleDatabaseError(database.Connection.First(&category, id)); err != nil {
-		return categories.Category{}, err
+	if result := service.database.First(&category, id); result.Error != nil {
+		return categories.Category{}, result.Error
 	}
 
 	return category, nil
@@ -65,12 +63,12 @@ func (service *CategoriesServiceImpl) Update(id string, updateCategoryDto catego
 		Name: updateCategoryDto.Name,
 	}
 
-	if err := lib.HandleDatabaseError(database.Connection.First(&category, id)); err != nil {
-		return categories.Category{}, err
+	if result := service.database.First(&category, id); result.Error != nil {
+		return categories.Category{}, result.Error
 	}
 
-	if err := lib.HandleDatabaseError(database.Connection.Model(&category).Updates(updatedCategory)); err != nil {
-		return categories.Category{}, err
+	if result := service.database.Model(&category).Updates(updatedCategory); result.Error != nil {
+		return categories.Category{}, result.Error
 	}
 
 	return category, nil
@@ -79,12 +77,12 @@ func (service *CategoriesServiceImpl) Update(id string, updateCategoryDto catego
 func (service *CategoriesServiceImpl) Delete(id string) (categories.Category, error) {
 	var category categories.Category
 
-	if err := lib.HandleDatabaseError(database.Connection.First(&category, id)); err != nil {
-		return categories.Category{}, err
+	if result := service.database.First(&category, id); result.Error != nil {
+		return categories.Category{}, result.Error
 	}
 
-	if err := lib.HandleDatabaseError(database.Connection.Delete(&categories.Category{}, id)); err != nil {
-		return categories.Category{}, err
+	if result := service.database.Delete(&categories.Category{}, id); result.Error != nil {
+		return categories.Category{}, result.Error
 	}
 
 	return category, nil

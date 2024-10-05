@@ -1,4 +1,4 @@
-package UsersDto
+package users
 
 type CreateUserDto struct {
 	Email    string `json:"email" binding:"required"`

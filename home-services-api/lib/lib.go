@@ -3,10 +3,17 @@ package lib
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+func IsNumeric(s string) bool {
+	_, err := strconv.Atoi(s)
+
+	return err == nil
+}
 
 func HandleError(c *gin.Context, status int, err error) {
 	c.JSON(status, gin.H{
@@ -50,6 +57,13 @@ func HandleShouldBind(c *gin.Context, dto interface{}) bool {
 	}
 
 	return true
+}
+
+func RespondWithBadRequest(c *gin.Context, err error) {
+	c.JSON(http.StatusBadRequest, gin.H{
+		"error":  err,
+		"status": 400,
+	})
 }
 
 func HandleDatabaseError(result *gorm.DB) error {

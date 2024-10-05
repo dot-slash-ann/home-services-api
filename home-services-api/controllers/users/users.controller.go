@@ -1,25 +1,43 @@
 package UsersController
 
 import (
+	"errors"
 	"net/http"
 
 	UsersDto "github.com/dot-slash-ann/home-services-api/dtos/users"
 	"github.com/dot-slash-ann/home-services-api/lib"
-	UsersService "github.com/dot-slash-ann/home-services-api/services/users"
+	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
+	"github.com/dot-slash-ann/home-services-api/services/users"
 	"github.com/gin-gonic/gin"
 )
 
-func SignUp(c *gin.Context) {
+type UsersController struct {
+	userService users.UsersService
+}
+
+func NewUsersController(service users.UsersService) *UsersController {
+	return &UsersController{
+		userService: service,
+	}
+}
+
+func (controller *UsersController) SignUp(c *gin.Context) {
 	var createUserDto UsersDto.CreateUserDto
 
-	if !lib.HandleShouldBind(c, &createUserDto) {
+	if err := c.ShouldBind(&createUserDto); err != nil {
+		httpErr := httpErrors.BadRequestError(err, nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
-	user, err := UsersService.SignUp(createUserDto)
+	user, err := controller.userService.SignUp(createUserDto)
 
 	if err != nil {
-		lib.HandleError(c, http.StatusBadRequest, err)
+		httpErr := httpErrors.BadRequestError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}
@@ -29,17 +47,23 @@ func SignUp(c *gin.Context) {
 	})
 }
 
-func Login(c *gin.Context) {
+func (controller *UsersController) Login(c *gin.Context) {
 	var loginUserDto UsersDto.LoginUserDto
 
-	if !lib.HandleShouldBind(c, &loginUserDto) {
+	if err := c.ShouldBind(&loginUserDto); err != nil {
+		httpErr := httpErrors.BadRequestError(err, nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
-	user, token, err := UsersService.Login(loginUserDto)
+	user, token, err := controller.userService.Login(loginUserDto)
 
 	if err != nil {
-		lib.HandleError(c, http.StatusUnauthorized, err)
+		httpErr := httpErrors.UnauthorizedError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}
@@ -47,19 +71,20 @@ func Login(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Authorization", string(token), 60*60*24*7, "", "", true, true)
 
+	//
+
 	c.JSON(http.StatusOK, gin.H{
 		"data": UsersDto.UserToJson(user),
 	})
 }
 
-func FindAll(c *gin.Context) {
-	users, err := UsersService.FindAll()
+func (controller *UsersController) FindAll(c *gin.Context) {
+	users, err := controller.userService.FindAll()
 
-	// TODO: this is a bad response
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": err,
-		})
+		httpErr := httpErrors.InternalServerError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}
@@ -69,17 +94,31 @@ func FindAll(c *gin.Context) {
 	})
 }
 
-func FindOne(c *gin.Context) {
-	id, found := lib.GetParam(c, "id")
+func (controller *UsersController) FindOne(c *gin.Context) {
+	id, found := c.Params.Get("id")
 
 	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
-	user, err := UsersService.FindOne(id)
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	user, err := controller.userService.FindOne(id)
 
 	if err != nil {
-		lib.HandleError(c, http.StatusNotFound, err)
+		httpErr := httpErrors.NotFoundError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}

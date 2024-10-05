@@ -11,6 +11,7 @@ import (
 	"github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/dot-slash-ann/home-services-api/services/tags"
 	"github.com/dot-slash-ann/home-services-api/services/transactions"
+	"github.com/dot-slash-ann/home-services-api/services/users"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,6 +22,8 @@ func init() {
 
 func main() {
 	router := gin.Default()
+
+	router.Use(middleware.ErrorHandler())
 
 	categoriesService := categories.NewCategoriesService(database.Connection)
 	categoriesController := categoriesController.NewCategoriesController(categoriesService)
@@ -49,10 +52,13 @@ func main() {
 	router.PATCH("api/tags/:id", tagsController.Update)
 	router.DELETE("api/tags/:id", tagsController.Delete)
 
+	usersService := users.NewUsersService(database.Connection)
+	usersController := usersController.NewUsersController(usersService)
+
 	router.POST("api/signup", usersController.SignUp)
 	router.POST("api/login", usersController.Login)
-	router.GET("api/users", middleware.RequireAuth, usersController.FindAll)
-	router.GET("api/users/:id", middleware.RequireAuth, usersController.FindOne)
+	router.GET("api/users", middleware.RequireAuth(usersService), usersController.FindAll)
+	router.GET("api/users/:id", middleware.RequireAuth(usersService), usersController.FindOne)
 
 	router.Run()
 }

@@ -1,10 +1,12 @@
-package TransactionsController
+package transactions
 
 import (
+	"errors"
 	"net/http"
 
 	transactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
 	"github.com/dot-slash-ann/home-services-api/lib"
+	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
 	"github.com/dot-slash-ann/home-services-api/services/transactions"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +31,9 @@ func (controller *TransactionsController) Create(c *gin.Context) {
 	transaction, err := controller.transactionsService.Create(createTransactionDto)
 
 	if err != nil {
-		lib.HandleError(c, http.StatusBadRequest, err)
+		httpErr := httpErrors.BadRequestError(err, nil)
+
+		c.Error((httpErr))
 
 		return
 	}
@@ -44,9 +48,9 @@ func (controller *TransactionsController) FindAll(c *gin.Context) {
 
 	// TODO: this is a bad response code
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": err,
-		})
+		httpErr := httpErrors.InternalServerError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}
@@ -57,16 +61,29 @@ func (controller *TransactionsController) FindAll(c *gin.Context) {
 }
 
 func (controller *TransactionsController) FindOne(c *gin.Context) {
-	id, found := lib.GetParam(c, "id")
+	id, found := c.Params.Get("id")
 
 	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
 	transaction, err := controller.transactionsService.FindOne(id)
 
 	if err != nil {
-		lib.HandleError(c, http.StatusNotFound, err)
+		httpErr := httpErrors.NotFoundError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}
@@ -77,9 +94,21 @@ func (controller *TransactionsController) FindOne(c *gin.Context) {
 }
 
 func (controller *TransactionsController) Update(c *gin.Context) {
-	id, found := lib.GetParam(c, "id")
+	id, found := c.Params.Get("id")
 
 	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
@@ -103,9 +132,21 @@ func (controller *TransactionsController) Update(c *gin.Context) {
 }
 
 func (controller *TransactionsController) Delete(c *gin.Context) {
-	id, found := lib.GetParam(c, "id")
+	id, found := c.Params.Get("id")
 
 	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 

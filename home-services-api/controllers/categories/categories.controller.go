@@ -1,10 +1,12 @@
-package CategoriesController
+package categories
 
 import (
+	"errors"
 	"net/http"
 
 	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
 	"github.com/dot-slash-ann/home-services-api/lib"
+	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
 	"github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/gin-gonic/gin"
 )
@@ -22,14 +24,20 @@ func NewCategoriesController(service categories.CategoriesService) *CategoriesCo
 func (controller *CategoriesController) Create(c *gin.Context) {
 	var createCategoryDto categoriesDto.CreateCategoryDto
 
-	if !lib.HandleShouldBind(c, &createCategoryDto) {
+	if err := c.ShouldBind(&createCategoryDto); err != nil {
+		httpErr := httpErrors.BadRequestError(err, nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
 	category, err := controller.categoriesService.Create(createCategoryDto)
 
 	if err != nil {
-		lib.HandleError(c, http.StatusBadRequest, err)
+		httpErr := httpErrors.BadRequestError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}
@@ -42,11 +50,10 @@ func (controller *CategoriesController) Create(c *gin.Context) {
 func (controller *CategoriesController) FindAll(c *gin.Context) {
 	categories, err := controller.categoriesService.FindAll()
 
-	// TODO: this is a bad response code
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": err,
-		})
+		httpErr := httpErrors.InternalServerError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}
@@ -57,16 +64,30 @@ func (controller *CategoriesController) FindAll(c *gin.Context) {
 }
 
 func (controller *CategoriesController) FindOne(c *gin.Context) {
-	id, found := lib.GetParam(c, "id")
+	id, found := c.Params.Get("id")
 
 	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
 	category, err := controller.categoriesService.FindOne(id)
 
 	if err != nil {
-		lib.HandleError(c, http.StatusNotFound, err)
+		httpErr := httpErrors.NotFoundError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}
@@ -77,15 +98,31 @@ func (controller *CategoriesController) FindOne(c *gin.Context) {
 }
 
 func (controller *CategoriesController) Update(c *gin.Context) {
-	id, found := lib.GetParam(c, "id")
+	id, found := c.Params.Get("id")
 
 	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
 	var updateCategoryDto categoriesDto.UpdateCategoryDto
 
-	if !lib.HandleShouldBind(c, &updateCategoryDto) {
+	if err := c.ShouldBind(&updateCategoryDto); err != nil {
+		httpErr := httpErrors.BadRequestError(err, nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
@@ -103,9 +140,21 @@ func (controller *CategoriesController) Update(c *gin.Context) {
 }
 
 func (controller *CategoriesController) Delete(c *gin.Context) {
-	id, found := lib.GetParam(c, "id")
+	id, found := c.Params.Get("id")
 
 	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
 		return
 	}
 
