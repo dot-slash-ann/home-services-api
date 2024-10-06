@@ -1,6 +1,8 @@
 package tags
 
 import (
+	"log"
+
 	tagsDto "github.com/dot-slash-ann/home-services-api/dtos/tags"
 	"github.com/dot-slash-ann/home-services-api/entities/tags"
 	"gorm.io/gorm"
@@ -60,9 +62,11 @@ func (service *TagsServiceImpl) FindOne(id string) (tags.Tag, error) {
 func (service *TagsServiceImpl) FindOneOrCreate(name string) (tags.Tag, error) {
 	var tag tags.Tag
 
-	if result := service.database.FirstOrCreate(&tag, "name = ?", name); result.Error != nil {
+	if result := service.database.FirstOrCreate(&tag, tags.Tag{Name: name}); result.Error != nil {
 		return tags.Tag{}, result.Error
 	}
+
+	log.Default().Println("service FindOneOrCreate - ", tag.Name, tag.ID)
 
 	return tag, nil
 }
