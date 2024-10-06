@@ -89,15 +89,15 @@ func TestCategoriesServiceFindAll(t *testing.T) {
 
 	create(t, categoriesService, names)
 
-	categories, err := categoriesService.FindAll()
+	categoriesList, err := categoriesService.FindAll()
 
 	if err != nil {
 		t.Errorf("expected no error, but got: %v", err)
 	}
 
-	assert.Equal(t, 5, len(categories))
+	assert.Equal(t, 5, len(categoriesList))
 
-	for i, category := range categories {
+	for i, category := range categoriesList {
 		assert.Equal(t, fmt.Sprintf("mock category %v", i), category.Name)
 	}
 }
