@@ -35,9 +35,15 @@ go mod download
 go install github.com/githubnemo/CompileDaemon
 ```
 
-4. Configure environment variables for your database setup
+4. run tests
+```bash
+go test ./...
+```
 
-5. run the app
+
+5. Configure environment variables for your database setup
+
+6. run the app
 
 ```bash
 CompileDaemon -command="./home-services-api"
