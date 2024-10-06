@@ -12,6 +12,7 @@ type TagsService interface {
 	FindOne(string) (tags.Tag, error)
 	Update(string, tagsDto.UpdateTagDto) (tags.Tag, error)
 	Delete(string) (tags.Tag, error)
+	FindOneOrCreate(string) (tags.Tag, error)
 }
 
 type TagsServiceImpl struct {
@@ -50,6 +51,16 @@ func (service *TagsServiceImpl) FindOne(id string) (tags.Tag, error) {
 	var tag tags.Tag
 
 	if result := service.database.First(&tag, id); result.Error != nil {
+		return tags.Tag{}, result.Error
+	}
+
+	return tag, nil
+}
+
+func (service *TagsServiceImpl) FindOneOrCreate(name string) (tags.Tag, error) {
+	var tag tags.Tag
+
+	if result := service.database.FirstOrCreate(&tag, "name = ?", name); result.Error != nil {
 		return tags.Tag{}, result.Error
 	}
 

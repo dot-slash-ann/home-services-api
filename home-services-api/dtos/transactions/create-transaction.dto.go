@@ -9,8 +9,8 @@ type CreateTransactionDto struct {
 	TransactionOn time.Time `json:"transaction_on" binding:"required"`
 	PostedOn      time.Time `json:"posted_on" binding:"required"`
 	Amount        uint      `json:"amount" binding:"required"`
-	VendorId      uint      `json:"vendor_id"`
-	CategoryId    uint      `json:"category_id"`
+	VendorID      uint      `json:"vendor_id"`
+	CategoryID    uint      `json:"category_id"`
 }
 
 func (t *CreateTransactionDto) UnmarshalJSON(data []byte) error {

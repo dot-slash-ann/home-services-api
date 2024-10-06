@@ -1,6 +1,7 @@
 package transactions
 
 import (
+	"github.com/dot-slash-ann/home-services-api/dtos/tags"
 	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +16,7 @@ func TransactionToJson(transaction TransactionsEntity.Transaction) gin.H {
 			"id":   transaction.Category.ID,
 			"name": transaction.Category.Name,
 		},
+		"tags": tags.ManyTagsToJson(transaction.Tags),
 	}
 }
 

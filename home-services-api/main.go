@@ -34,15 +34,6 @@ func main() {
 	router.PATCH("api/categories/:id", categoriesController.Update)
 	router.DELETE("api/categories/:id", categoriesController.Delete)
 
-	transactionsService := transactions.NewTransactionsService(database.Connection, categoriesService)
-	transactionsController := transactionsController.NewTransactionsController(transactionsService)
-
-	router.POST("api/transactions", transactionsController.Create)
-	router.GET("api/transactions", transactionsController.FindAll)
-	router.GET("api/transactions/:id", transactionsController.FindOne)
-	router.PATCH("api/transactions/:id", transactionsController.Update)
-	router.DELETE("api/transactions/:id", transactionsController.Delete)
-
 	tagsService := tags.NewTagsService(database.Connection)
 	tagsController := tagsController.NewTagsController(tagsService)
 
@@ -51,6 +42,16 @@ func main() {
 	router.GET("api/tags/:id", tagsController.FindOne)
 	router.PATCH("api/tags/:id", tagsController.Update)
 	router.DELETE("api/tags/:id", tagsController.Delete)
+
+	transactionsService := transactions.NewTransactionsService(database.Connection, categoriesService, tagsService)
+	transactionsController := transactionsController.NewTransactionsController(transactionsService)
+
+	router.POST("api/transactions", transactionsController.Create)
+	router.GET("api/transactions", transactionsController.FindAll)
+	router.GET("api/transactions/:id", transactionsController.FindOne)
+	router.PATCH("api/transactions/:id", transactionsController.Update)
+	router.DELETE("api/transactions/:id", transactionsController.Delete)
+	router.POST("api/transaction/:id/tag", transactionsController.TagTransaction)
 
 	usersService := users.NewUsersService(database.Connection)
 	usersController := usersController.NewUsersController(usersService)

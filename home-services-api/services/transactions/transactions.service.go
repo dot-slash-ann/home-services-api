@@ -1,37 +1,41 @@
 package transactions
 
 import (
-	"errors"
 	"fmt"
+	"strings"
 
-	TransactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
+	transactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
 	"github.com/dot-slash-ann/home-services-api/entities/transactions"
 	"github.com/dot-slash-ann/home-services-api/services/categories"
+	"github.com/dot-slash-ann/home-services-api/services/tags"
 	"gorm.io/gorm"
 )
 
 type TransactionsService interface {
-	Create(TransactionsDto.CreateTransactionDto) (transactions.Transaction, error)
+	Create(transactionsDto.CreateTransactionDto) (transactions.Transaction, error)
 	FindAll(map[string]string) ([]transactions.Transaction, error)
 	FindOne(string) (transactions.Transaction, error)
-	Update(string, TransactionsDto.UpdateTransactionDto) (transactions.Transaction, error)
+	Update(string, transactionsDto.UpdateTransactionDto) (transactions.Transaction, error)
 	Delete(string) (transactions.Transaction, error)
+	TagTransaction(transactionsDto.TagTransactionDto, string) (transactions.Transaction, error)
 }
 
 type TransactionsServiceImpl struct {
 	database          *gorm.DB
 	categoriesService categories.CategoriesService
+	tagsService       tags.TagsService
 }
 
-func NewTransactionsService(database *gorm.DB, categoriesService categories.CategoriesService) *TransactionsServiceImpl {
+func NewTransactionsService(database *gorm.DB, categoriesService categories.CategoriesService, tagsService tags.TagsService) *TransactionsServiceImpl {
 	return &TransactionsServiceImpl{
 		database:          database,
 		categoriesService: categoriesService,
+		tagsService:       tagsService,
 	}
 }
 
-func (service *TransactionsServiceImpl) Create(createTransactionDto TransactionsDto.CreateTransactionDto) (transactions.Transaction, error) {
-	category, err := service.FindOne(fmt.Sprint(createTransactionDto.CategoryId))
+func (service *TransactionsServiceImpl) Create(createTransactionDto transactionsDto.CreateTransactionDto) (transactions.Transaction, error) {
+	category, err := service.categoriesService.FindOne(fmt.Sprint(createTransactionDto.CategoryID))
 
 	if err != nil {
 		return transactions.Transaction{}, err
@@ -41,7 +45,7 @@ func (service *TransactionsServiceImpl) Create(createTransactionDto Transactions
 		TransactionOn: createTransactionDto.TransactionOn,
 		PostedOn:      createTransactionDto.PostedOn,
 		Amount:        createTransactionDto.Amount,
-		VendorId:      createTransactionDto.VendorId,
+		VendorId:      createTransactionDto.VendorID,
 		CategoryID:    category.ID,
 	}
 
@@ -59,9 +63,9 @@ func (service *TransactionsServiceImpl) Create(createTransactionDto Transactions
 func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]transactions.Transaction, error) {
 	var transactionsList []transactions.Transaction
 
-	query := service.database.Model(&transactions.Transaction{}).Preload("Category")
+	query := service.database.Model(&transactions.Transaction{}).Preload("Category").Preload("Tags")
 
-	if categoryName, ok := filters["category"]; ok && categoryName != "" {
+	if categoryName, ok := filters["category"]; ok {
 		category, err := service.categoriesService.FindByName(categoryName)
 
 		if err != nil {
@@ -69,14 +73,24 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 		}
 
 		query.Where("category_id = ?", category.ID)
-	} else if categoryName != "" {
-		return []transactions.Transaction{}, errors.New("category does not exist")
+	}
+
+	if tags, ok := filters["tags"]; ok && tags != "" {
+		tagList := strings.Split(tags, ",")
+
+		query = query.Joins("JOIN transaction_tags ON transactions.id = transaction_tags.transaction_id").
+			Joins("JOIN tags on transaction_tags.tag_id = tags.id").
+			Where("tags.name IN (?)", tagList)
 	}
 
 	if result := query.Find(&transactionsList); result.Error != nil {
 		return []transactions.Transaction{}, result.Error
-
 	}
+
+	if len(transactionsList) == 0 {
+		return []transactions.Transaction{}, nil
+	}
+
 	return transactionsList, nil
 }
 
@@ -90,7 +104,7 @@ func (service *TransactionsServiceImpl) FindOne(id string) (transactions.Transac
 	return transaction, nil
 }
 
-func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto TransactionsDto.UpdateTransactionDto) (transactions.Transaction, error) {
+func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto transactionsDto.UpdateTransactionDto) (transactions.Transaction, error) {
 	var transaction transactions.Transaction
 
 	if result := service.database.First(&transaction, id); result.Error != nil {
@@ -130,6 +144,26 @@ func (service *TransactionsServiceImpl) Delete(id string) (transactions.Transact
 
 	if result := service.database.Delete(&transactions.Transaction{}, id); result.Error != nil {
 		return transactions.Transaction{}, result.Error
+	}
+
+	return transaction, nil
+}
+
+func (service *TransactionsServiceImpl) TagTransaction(tagTransactionDto transactionsDto.TagTransactionDto, id string) (transactions.Transaction, error) {
+	var transaction transactions.Transaction
+
+	if result := service.database.Preload("Category").First(&transaction, id); result.Error != nil {
+		return transactions.Transaction{}, result.Error
+	}
+
+	tag, err := service.tagsService.FindOneOrCreate(tagTransactionDto.TagName)
+
+	if err != nil {
+		return transactions.Transaction{}, err
+	}
+
+	if err := service.database.Model(&transaction).Association("Tags").Append(&tag); err != nil {
+		return transactions.Transaction{}, err
 	}
 
 	return transaction, nil

@@ -44,14 +44,19 @@ func (controller *TransactionsController) Create(c *gin.Context) {
 }
 
 func (controller *TransactionsController) FindAll(c *gin.Context) {
-	// tags := c.Query("tags")
-	category := c.Query("category")
+	filters := make(map[string]string)
 
-	transactions, err := controller.transactionsService.FindAll(map[string]string{
-		"category": category,
-	})
+	if tags := c.Query("tags"); tags != "" {
+		filters["tags"] = tags
+	}
 
-	if err != nil {
+	if category := c.Query("category"); category != "" {
+		filters["category"] = category
+	}
+
+	transactionsList, err := controller.transactionsService.FindAll(filters)
+
+	if err != nil && err.Error() != "record not found" {
 		httpErr := httpErrors.InternalServerError(err, nil)
 
 		c.Error(httpErr)
@@ -60,7 +65,7 @@ func (controller *TransactionsController) FindAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": transactionsDto.ManyTransactionsToJson(transactions),
+		"data": transactionsDto.ManyTransactionsToJson(transactionsList),
 	})
 }
 
@@ -158,6 +163,50 @@ func (controller *TransactionsController) Delete(c *gin.Context) {
 
 	if err != nil {
 		lib.HandleError(c, http.StatusNotFound, err)
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": transactionsDto.TransactionToJson(transaction),
+	})
+}
+
+func (controller *TransactionsController) TagTransaction(c *gin.Context) {
+	id, found := c.Params.Get("id")
+
+	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	var tagTransactionDto transactionsDto.TagTransactionDto
+
+	if err := c.ShouldBind(&tagTransactionDto); err != nil {
+		httpErr := httpErrors.BadRequestError(err, nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	transaction, err := controller.transactionsService.TagTransaction(tagTransactionDto, id)
+
+	if err != nil {
+		httpErr := httpErrors.InternalServerError(err, nil)
+
+		c.Error(httpErr)
 
 		return
 	}
