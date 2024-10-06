@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/dot-slash-ann/home-services-api/database"
-	CategoriesEntity "github.com/dot-slash-ann/home-services-api/entities/categories"
-	TagsEntity "github.com/dot-slash-ann/home-services-api/entities/tags"
-	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"
-	UserEntity "github.com/dot-slash-ann/home-services-api/entities/users"
+	"github.com/dot-slash-ann/home-services-api/entities/categories"
+	"github.com/dot-slash-ann/home-services-api/entities/tags"
+	"github.com/dot-slash-ann/home-services-api/entities/transactions"
+	"github.com/dot-slash-ann/home-services-api/entities/users"
 	"github.com/dot-slash-ann/home-services-api/initializers"
 )
 
@@ -15,9 +15,9 @@ func init() {
 }
 
 func main() {
-	database.Connection.AutoMigrate(&CategoriesEntity.Category{})
-	database.Connection.AutoMigrate(&TagsEntity.Tag{})
-	database.Connection.AutoMigrate(&TransactionsEntity.Transaction{})
+	database.Connection.AutoMigrate(&categories.Category{})
+	database.Connection.AutoMigrate(&tags.Tag{})
+	database.Connection.AutoMigrate(&transactions.Transaction{})
 
-	database.Connection.AutoMigrate(&UserEntity.User{})
+	database.Connection.AutoMigrate(&users.User{})
 }
