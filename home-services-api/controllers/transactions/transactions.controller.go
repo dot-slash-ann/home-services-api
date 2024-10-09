@@ -54,6 +54,14 @@ func (controller *TransactionsController) FindAll(c *gin.Context) {
 		filters["category"] = category
 	}
 
+	if minAmount := c.Query("min"); minAmount != "" {
+		filters["min"] = minAmount
+	}
+
+	if maxAmount := c.Query("max"); maxAmount != "" {
+		filters["max"] = maxAmount
+	}
+
 	transactionsList, err := controller.transactionsService.FindAll(filters)
 
 	if err != nil && err.Error() != "record not found" {

@@ -83,6 +83,14 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 			Where("tags.name IN (?)", tagList)
 	}
 
+	if min, ok := filters["min"]; ok && min != "" {
+		query.Where("transactions.amount >= ?", min)
+	}
+
+	if max, ok := filters["max"]; ok && max != "" {
+		query.Where("transactions.amount <= ?", max)
+	}
+
 	if result := query.Find(&transactionsList); result.Error != nil {
 		return []transactions.Transaction{}, result.Error
 	}
