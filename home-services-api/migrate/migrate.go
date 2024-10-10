@@ -6,6 +6,7 @@ import (
 	"github.com/dot-slash-ann/home-services-api/entities/tags"
 	"github.com/dot-slash-ann/home-services-api/entities/transactions"
 	"github.com/dot-slash-ann/home-services-api/entities/users"
+	"github.com/dot-slash-ann/home-services-api/entities/vendors"
 	"github.com/dot-slash-ann/home-services-api/initializers"
 )
 
@@ -15,6 +16,7 @@ func init() {
 }
 
 func main() {
+	database.Connection.AutoMigrate(&vendors.Vendor{})
 	database.Connection.AutoMigrate(&categories.Category{})
 	database.Connection.AutoMigrate(&tags.Tag{})
 	database.Connection.AutoMigrate(&transactions.Transaction{})

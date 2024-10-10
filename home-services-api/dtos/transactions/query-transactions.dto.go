@@ -1,7 +1,9 @@
 package transactions
 
 import (
+	"github.com/dot-slash-ann/home-services-api/dtos/categories"
 	"github.com/dot-slash-ann/home-services-api/dtos/tags"
+	"github.com/dot-slash-ann/home-services-api/dtos/vendors"
 	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"
 	"github.com/gin-gonic/gin"
 )
@@ -9,14 +11,12 @@ import (
 func TransactionToJson(transaction TransactionsEntity.Transaction) gin.H {
 	return gin.H{
 		"id":             transaction.ID,
+		"amount":         transaction.Amount,
 		"transaction_on": transaction.TransactionOn,
 		"posted_on":      transaction.PostedOn,
-		"amount":         transaction.Amount,
-		"category": gin.H{
-			"id":   transaction.Category.ID,
-			"name": transaction.Category.Name,
-		},
-		"tags": tags.ManyTagsToJson(transaction.Tags),
+		"category":       categories.CategoryToJson(transaction.Category),
+		"tags":           tags.ManyTagsToJson(transaction.Tags),
+		"vendor":         vendors.VendorToJson(transaction.Vendor),
 	}
 }
 

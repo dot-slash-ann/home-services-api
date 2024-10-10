@@ -5,6 +5,7 @@ import (
 	tagsController "github.com/dot-slash-ann/home-services-api/controllers/tags"
 	transactionsController "github.com/dot-slash-ann/home-services-api/controllers/transactions"
 	usersController "github.com/dot-slash-ann/home-services-api/controllers/users"
+	vendorsController "github.com/dot-slash-ann/home-services-api/controllers/vendors"
 	"github.com/dot-slash-ann/home-services-api/database"
 	"github.com/dot-slash-ann/home-services-api/initializers"
 	"github.com/dot-slash-ann/home-services-api/middleware"
@@ -12,6 +13,7 @@ import (
 	"github.com/dot-slash-ann/home-services-api/services/tags"
 	"github.com/dot-slash-ann/home-services-api/services/transactions"
 	"github.com/dot-slash-ann/home-services-api/services/users"
+	"github.com/dot-slash-ann/home-services-api/services/vendors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +26,15 @@ func main() {
 	router := gin.Default()
 
 	router.Use(middleware.ErrorHandler())
+
+	vendorsService := vendors.NewVendorsService(database.Connection)
+	vendorsController := vendorsController.NewVendorsController(vendorsService)
+
+	router.POST("api/vendors", vendorsController.Create)
+	router.GET("api/vendors", vendorsController.FindAll)
+	router.GET("api/vendors/:id", vendorsController.FindOne)
+	router.PATCH("api/vendors/:id", vendorsController.Update)
+	router.DELETE("api/vendors/:id", vendorsController.Delete)
 
 	categoriesService := categories.NewCategoriesService(database.Connection)
 	categoriesController := categoriesController.NewCategoriesController(categoriesService)

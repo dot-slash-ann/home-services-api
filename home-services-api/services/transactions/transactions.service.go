@@ -45,7 +45,7 @@ func (service *TransactionsServiceImpl) Create(createTransactionDto transactions
 		TransactionOn: createTransactionDto.TransactionOn,
 		PostedOn:      createTransactionDto.PostedOn,
 		Amount:        createTransactionDto.Amount,
-		VendorId:      createTransactionDto.VendorID,
+		VendorID:      createTransactionDto.VendorID,
 		CategoryID:    category.ID,
 	}
 
@@ -53,7 +53,7 @@ func (service *TransactionsServiceImpl) Create(createTransactionDto transactions
 		return transactions.Transaction{}, result.Error
 	}
 
-	if result := service.database.Preload("Category").First(&transaction, fmt.Sprint(transaction.ID)); result.Error != nil {
+	if result := service.database.Preload("Category").Preload("Tags").Preload("Vendor").First(&transaction, fmt.Sprint(transaction.ID)); result.Error != nil {
 		return transactions.Transaction{}, result.Error
 	}
 
@@ -63,7 +63,7 @@ func (service *TransactionsServiceImpl) Create(createTransactionDto transactions
 func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]transactions.Transaction, error) {
 	var transactionsList []transactions.Transaction
 
-	query := service.database.Model(&transactions.Transaction{}).Preload("Category").Preload("Tags")
+	query := service.database.Model(&transactions.Transaction{}).Preload("Category").Preload("Tags").Preload("Vendor")
 
 	if categoryName, ok := filters["category"]; ok {
 		category, err := service.categoriesService.FindByName(categoryName)
@@ -105,7 +105,7 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 func (service *TransactionsServiceImpl) FindOne(id string) (transactions.Transaction, error) {
 	var transaction transactions.Transaction
 
-	if result := service.database.Preload("Category").First(&transaction, id); result.Error != nil {
+	if result := service.database.Preload("Category").Preload("Vendor").Preload("Tags").First(&transaction, id); result.Error != nil {
 		return transactions.Transaction{}, result.Error
 	}
 
@@ -121,7 +121,7 @@ func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto t
 
 	category, err := service.categoriesService.FindOne(fmt.Sprint(updateTransactionDto.CategoryId))
 
-	if err != nil {
+	if err != nil && updateTransactionDto.CategoryId != 0 {
 		return transactions.Transaction{}, err
 	}
 
@@ -136,7 +136,7 @@ func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto t
 		return transactions.Transaction{}, result.Error
 	}
 
-	if result := service.database.Preload("Category").First(&transaction, fmt.Sprint(transaction.ID)); result.Error != nil {
+	if result := service.database.Preload("Category").Preload("Tags").Preload("Vendor").First(&transaction, fmt.Sprint(transaction.ID)); result.Error != nil {
 		return transactions.Transaction{}, result.Error
 	}
 
@@ -146,7 +146,7 @@ func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto t
 func (service *TransactionsServiceImpl) Delete(id string) (transactions.Transaction, error) {
 	var transaction transactions.Transaction
 
-	if result := service.database.Preload("Category").First(&transaction, id); result.Error != nil {
+	if result := service.database.Preload("Category").Preload("Tags").Preload("Vendor").First(&transaction, id); result.Error != nil {
 		return transactions.Transaction{}, result.Error
 	}
 
@@ -160,7 +160,7 @@ func (service *TransactionsServiceImpl) Delete(id string) (transactions.Transact
 func (service *TransactionsServiceImpl) TagTransaction(tagTransactionDto transactionsDto.TagTransactionDto, id string) (transactions.Transaction, error) {
 	var transaction transactions.Transaction
 
-	if result := service.database.Preload("Category").First(&transaction, id); result.Error != nil {
+	if result := service.database.Preload("Category").Preload("Tags").Preload("Vendor").First(&transaction, id); result.Error != nil {
 		return transactions.Transaction{}, result.Error
 	}
 
