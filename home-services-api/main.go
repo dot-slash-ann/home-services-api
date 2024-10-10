@@ -54,7 +54,7 @@ func main() {
 	router.PATCH("api/tags/:id", tagsController.Update)
 	router.DELETE("api/tags/:id", tagsController.Delete)
 
-	transactionsService := transactions.NewTransactionsService(database.Connection, categoriesService, tagsService)
+	transactionsService := transactions.NewTransactionsService(database.Connection, categoriesService, tagsService, vendorsService)
 	transactionsController := transactionsController.NewTransactionsController(transactionsService)
 
 	router.POST("api/transactions", transactionsController.Create)

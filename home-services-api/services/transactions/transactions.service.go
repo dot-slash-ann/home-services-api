@@ -8,6 +8,7 @@ import (
 	"github.com/dot-slash-ann/home-services-api/entities/transactions"
 	"github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/dot-slash-ann/home-services-api/services/tags"
+	"github.com/dot-slash-ann/home-services-api/services/vendors"
 	"gorm.io/gorm"
 )
 
@@ -24,13 +25,15 @@ type TransactionsServiceImpl struct {
 	database          *gorm.DB
 	categoriesService categories.CategoriesService
 	tagsService       tags.TagsService
+	vendorsService    vendors.VendorsService
 }
 
-func NewTransactionsService(database *gorm.DB, categoriesService categories.CategoriesService, tagsService tags.TagsService) *TransactionsServiceImpl {
+func NewTransactionsService(database *gorm.DB, categoriesService categories.CategoriesService, tagsService tags.TagsService, vendorsService vendors.VendorsService) *TransactionsServiceImpl {
 	return &TransactionsServiceImpl{
 		database:          database,
 		categoriesService: categoriesService,
 		tagsService:       tagsService,
+		vendorsService:    vendorsService,
 	}
 }
 
@@ -73,6 +76,16 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 		}
 
 		query.Where("category_id = ?", category.ID)
+	}
+
+	if vendorID, ok := filters["vendorID"]; ok {
+		vendor, err := service.vendorsService.FindOne(vendorID)
+
+		if err != nil {
+			return []transactions.Transaction{}, err
+		}
+
+		query.Where("vendor_id = ?", vendor.ID)
 	}
 
 	if tags, ok := filters["tags"]; ok && tags != "" {

@@ -62,6 +62,10 @@ func (controller *TransactionsController) FindAll(c *gin.Context) {
 		filters["max"] = maxAmount
 	}
 
+	if vendorID := c.Query("vendor_id"); vendorID != "" {
+		filters["vendorID"] = vendorID
+	}
+
 	transactionsList, err := controller.transactionsService.FindAll(filters)
 
 	if err != nil && err.Error() != "record not found" {
