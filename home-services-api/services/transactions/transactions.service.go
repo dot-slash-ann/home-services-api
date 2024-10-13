@@ -38,7 +38,13 @@ func NewTransactionsService(database *gorm.DB, categoriesService categories.Cate
 }
 
 func (service *TransactionsServiceImpl) Create(createTransactionDto transactionsDto.CreateTransactionDto) (transactions.Transaction, error) {
-	category, err := service.categoriesService.FindOne(fmt.Sprint(createTransactionDto.CategoryID))
+	category, err := service.categoriesService.FindByName(createTransactionDto.CategoryName)
+
+	if err != nil {
+		return transactions.Transaction{}, err
+	}
+
+	vendor, err := service.vendorsService.FindByName(createTransactionDto.VendorName)
 
 	if err != nil {
 		return transactions.Transaction{}, err
@@ -48,7 +54,7 @@ func (service *TransactionsServiceImpl) Create(createTransactionDto transactions
 		TransactionOn: createTransactionDto.TransactionOn,
 		PostedOn:      createTransactionDto.PostedOn,
 		Amount:        createTransactionDto.Amount,
-		VendorID:      createTransactionDto.VendorID,
+		VendorID:      vendor.ID,
 		CategoryID:    category.ID,
 	}
 
@@ -68,8 +74,16 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 
 	query := service.database.Model(&transactions.Transaction{}).Preload("Category").Preload("Tags").Preload("Vendor")
 
-	if categoryName, ok := filters["category"]; ok {
+	if categoryName, ok := filters["categoryName"]; ok {
 		category, err := service.categoriesService.FindByName(categoryName)
+
+		if err != nil {
+			return []transactions.Transaction{}, err
+		}
+
+		query.Where("category_id = ?", category.ID)
+	} else if categoryID, ok := filters["categoryID"]; ok {
+		category, err := service.categoriesService.FindOne(categoryID)
 
 		if err != nil {
 			return []transactions.Transaction{}, err
@@ -103,6 +117,8 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 	if max, ok := filters["max"]; ok && max != "" {
 		query.Where("transactions.amount <= ?", max)
 	}
+
+	query.Limit(100)
 
 	if result := query.Find(&transactionsList); result.Error != nil {
 		return []transactions.Transaction{}, result.Error

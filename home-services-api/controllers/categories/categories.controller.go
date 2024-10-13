@@ -7,15 +7,15 @@ import (
 	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
 	"github.com/dot-slash-ann/home-services-api/lib"
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
-	"github.com/dot-slash-ann/home-services-api/services/categories"
+	categoriesService "github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/gin-gonic/gin"
 )
 
 type CategoriesController struct {
-	categoriesService categories.CategoriesService
+	categoriesService categoriesService.CategoriesService
 }
 
-func NewCategoriesController(service categories.CategoriesService) *CategoriesController {
+func NewCategoriesController(service categoriesService.CategoriesService) *CategoriesController {
 	return &CategoriesController{
 		categoriesService: service,
 	}
@@ -29,6 +29,13 @@ func (controller *CategoriesController) Create(c *gin.Context) {
 
 		c.Error(httpErr)
 
+		return
+	}
+
+	if category, err := controller.categoriesService.FindByName(createCategoryDto.Name); err == nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"data": categoriesDto.CategoryToJson(category),
+		})
 		return
 	}
 

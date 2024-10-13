@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	categoriesController "github.com/dot-slash-ann/home-services-api/controllers/categories"
 	tagsController "github.com/dot-slash-ann/home-services-api/controllers/tags"
 	transactionsController "github.com/dot-slash-ann/home-services-api/controllers/transactions"
@@ -14,6 +16,7 @@ import (
 	"github.com/dot-slash-ann/home-services-api/services/transactions"
 	"github.com/dot-slash-ann/home-services-api/services/users"
 	"github.com/dot-slash-ann/home-services-api/services/vendors"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +27,15 @@ func init() {
 
 func main() {
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8080"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	router.Use(middleware.ErrorHandler())
 

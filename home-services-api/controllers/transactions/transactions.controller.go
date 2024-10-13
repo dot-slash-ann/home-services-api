@@ -50,8 +50,12 @@ func (controller *TransactionsController) FindAll(c *gin.Context) {
 		filters["tags"] = tags
 	}
 
-	if category := c.Query("category"); category != "" {
-		filters["category"] = category
+	if categoryName := c.Query("category_name"); categoryName != "" {
+		filters["categoryName"] = categoryName
+	}
+
+	if categoryID := c.Query("category_id"); categoryID != "" {
+		filters["categoryID"] = categoryID
 	}
 
 	if minAmount := c.Query("min"); minAmount != "" {
@@ -60,6 +64,10 @@ func (controller *TransactionsController) FindAll(c *gin.Context) {
 
 	if maxAmount := c.Query("max"); maxAmount != "" {
 		filters["max"] = maxAmount
+	}
+
+	if vendorName := c.Query("vendor_name"); vendorName != "" {
+		filters["vendorName"] = vendorName
 	}
 
 	if vendorID := c.Query("vendor_id"); vendorID != "" {
