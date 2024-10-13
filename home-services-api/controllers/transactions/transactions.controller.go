@@ -74,6 +74,22 @@ func (controller *TransactionsController) FindAll(c *gin.Context) {
 		filters["vendorID"] = vendorID
 	}
 
+	if transactionOnFrom := c.Query("transaction_on_from"); transactionOnFrom != "" {
+		filters["transactionOnFrom"] = transactionOnFrom
+	}
+
+	if transactionOnTo := c.Query("transaction_on_to"); transactionOnTo != "" {
+		filters["transactionOnTo"] = transactionOnTo
+	}
+
+	if postedOnFrom := c.Query("posted_on_from"); postedOnFrom != "" {
+		filters["postedOnFrom"] = postedOnFrom
+	}
+
+	if postedOnTo := c.Query("posted_on_to"); postedOnTo != "" {
+		filters["postedOnTo"] = postedOnTo
+	}
+
 	transactionsList, err := controller.transactionsService.FindAll(filters)
 
 	if err != nil && err.Error() != "record not found" {

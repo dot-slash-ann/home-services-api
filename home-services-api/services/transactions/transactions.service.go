@@ -118,6 +118,22 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 		query.Where("transactions.amount <= ?", max)
 	}
 
+	if transactionOnFrom, ok := filters["transactionOnFrom"]; ok && transactionOnFrom != "" {
+		query.Where("transactions.transaction_on >= ?", transactionOnFrom)
+	}
+
+	if transactionOnTo, ok := filters["transactionOnTo"]; ok && transactionOnTo != "" {
+		query.Where("transactions.transaction_on <= ?", transactionOnTo)
+	}
+
+	if postedOnFrom, ok := filters["postedOnFrom"]; ok && postedOnFrom != "" {
+		query.Where("transactions.posted_on >= ?", postedOnFrom)
+	}
+
+	if postedOnTo, ok := filters["postedOnTo"]; ok && postedOnTo != "" {
+		query.Where("transactions.posted_on <= ?", postedOnTo)
+	}
+
 	query.Order("posted_on ASC").Order("transaction_on ASC")
 	query.Limit(100)
 
