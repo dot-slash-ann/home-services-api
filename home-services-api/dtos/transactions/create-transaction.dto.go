@@ -6,11 +6,12 @@ import (
 )
 
 type CreateTransactionDto struct {
-	TransactionOn time.Time `json:"transaction_on" binding:"required"`
-	PostedOn      time.Time `json:"posted_on" binding:"required"`
-	Amount        uint      `json:"amount" binding:"required"`
-	CategoryName  string    `json:"category" binding:"required"`
-	VendorName    string    `json:"vendor" binding:"required"`
+	TransactionOn   time.Time `json:"transaction_on" binding:"required"`
+	PostedOn        time.Time `json:"posted_on" binding:"required"`
+	Amount          uint      `json:"amount" binding:"required"`
+	CategoryName    string    `json:"category" binding:"required"`
+	VendorName      string    `json:"vendor" binding:"required"`
+	TransactionType string    `json:"transaction_type" binding:"required"`
 }
 
 func (t *CreateTransactionDto) UnmarshalJSON(data []byte) error {

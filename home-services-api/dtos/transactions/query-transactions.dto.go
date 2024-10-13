@@ -10,13 +10,14 @@ import (
 
 func TransactionToJson(transaction TransactionsEntity.Transaction) gin.H {
 	return gin.H{
-		"id":             transaction.ID,
-		"amount":         transaction.Amount,
-		"transaction_on": transaction.TransactionOn,
-		"posted_on":      transaction.PostedOn,
-		"category":       categories.CategoryToJson(transaction.Category),
-		"tags":           tags.ManyTagsToJson(transaction.Tags),
-		"vendor":         vendors.VendorToJson(transaction.Vendor),
+		"id":               transaction.ID,
+		"amount":           transaction.Amount,
+		"transaction_on":   transaction.TransactionOn,
+		"posted_on":        transaction.PostedOn,
+		"transaction_type": transaction.TransactionType,
+		"category":         categories.CategoryToJson(transaction.Category),
+		"tags":             tags.ManyTagsToJson(transaction.Tags),
+		"vendor":           vendors.VendorToJson(transaction.Vendor),
 	}
 }
 

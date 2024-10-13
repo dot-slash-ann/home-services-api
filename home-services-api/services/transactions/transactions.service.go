@@ -51,11 +51,12 @@ func (service *TransactionsServiceImpl) Create(createTransactionDto transactions
 	}
 
 	transaction := transactions.Transaction{
-		TransactionOn: createTransactionDto.TransactionOn,
-		PostedOn:      createTransactionDto.PostedOn,
-		Amount:        createTransactionDto.Amount,
-		VendorID:      vendor.ID,
-		CategoryID:    category.ID,
+		TransactionOn:   createTransactionDto.TransactionOn,
+		PostedOn:        createTransactionDto.PostedOn,
+		Amount:          createTransactionDto.Amount,
+		TransactionType: createTransactionDto.TransactionType,
+		VendorID:        vendor.ID,
+		CategoryID:      category.ID,
 	}
 
 	if result := service.database.Create(&transaction); result.Error != nil {
@@ -134,7 +135,7 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 		query.Where("transactions.posted_on <= ?", postedOnTo)
 	}
 
-	query.Order("posted_on ASC").Order("transaction_on ASC")
+	query.Order("transaction_on ASC").Order("posted_on ASC")
 	query.Limit(100)
 
 	if result := query.Find(&transactionsList); result.Error != nil {
