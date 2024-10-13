@@ -118,6 +118,7 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 		query.Where("transactions.amount <= ?", max)
 	}
 
+	query.Order("posted_on ASC").Order("transaction_on ASC")
 	query.Limit(100)
 
 	if result := query.Find(&transactionsList); result.Error != nil {
