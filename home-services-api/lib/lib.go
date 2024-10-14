@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func IsNumeric(s string) bool {
@@ -21,16 +20,6 @@ func HandleError(c *gin.Context, status int, err error) {
 	})
 }
 
-func GetParam(c *gin.Context, param string) (string, bool) {
-	value, found := c.Params.Get(param)
-
-	if !found {
-		c.JSON(http.StatusBadRequest, gin.H{})
-	}
-
-	return value, found
-}
-
 func HandleDecodeTime(c *gin.Context, dto interface{}) bool {
 	if err := json.NewDecoder(c.Request.Body).Decode(dto); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -43,33 +32,4 @@ func HandleDecodeTime(c *gin.Context, dto interface{}) bool {
 	}
 
 	return true
-}
-
-func HandleShouldBind(c *gin.Context, dto interface{}) bool {
-	if err := c.ShouldBind(dto); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "invalid request data",
-			"message": "expected request body",
-			"code":    400,
-		})
-
-		return false
-	}
-
-	return true
-}
-
-func RespondWithBadRequest(c *gin.Context, err error) {
-	c.JSON(http.StatusBadRequest, gin.H{
-		"error":  err,
-		"status": 400,
-	})
-}
-
-func HandleDatabaseError(result *gorm.DB) error {
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
 }
