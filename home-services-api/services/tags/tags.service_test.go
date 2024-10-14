@@ -6,10 +6,7 @@ import (
 	"testing"
 
 	tagsDto "github.com/dot-slash-ann/home-services-api/dtos/tags"
-	"github.com/dot-slash-ann/home-services-api/entities/categories"
-	"github.com/dot-slash-ann/home-services-api/entities/tags"
-	"github.com/dot-slash-ann/home-services-api/entities/transactions"
-	"github.com/dot-slash-ann/home-services-api/entities/users"
+	"github.com/dot-slash-ann/home-services-api/entities"
 	tagsService "github.com/dot-slash-ann/home-services-api/services/tags"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
@@ -23,10 +20,10 @@ func setupTestDB() *gorm.DB {
 		log.Fatalf("failed to connect to in-memory SQLite database: %v", err)
 	}
 
-	db.AutoMigrate(&categories.Category{})
-	db.AutoMigrate(&tags.Tag{})
-	db.AutoMigrate(&transactions.Transaction{})
-	db.AutoMigrate(&users.User{})
+	db.AutoMigrate(&entities.Category{})
+	db.AutoMigrate(&entities.Tag{})
+	db.AutoMigrate(&entities.Transaction{})
+	db.AutoMigrate(&entities.User{})
 
 	return db
 }
@@ -38,8 +35,8 @@ func getService() (tagsService.TagsService, *gorm.DB) {
 	return tagsService, db
 }
 
-func create(t *testing.T, service tagsService.TagsService, names []string) []tags.Tag {
-	tagsList := make([]tags.Tag, len(names))
+func create(t *testing.T, service tagsService.TagsService, names []string) []entities.Tag {
+	tagsList := make([]entities.Tag, len(names))
 
 	for _, name := range names {
 		createTagDto := tagsDto.CreateTagDto{
@@ -68,7 +65,7 @@ func TestTagsServiceCreate(t *testing.T) {
 	tag, err := tagsService.Create(createTagDto)
 
 	var count int64
-	db.Model(&tags.Tag{}).Count(&count)
+	db.Model(&entities.Tag{}).Count(&count)
 
 	if err != nil {
 		t.Errorf("expected no error, but got: %v", err)
@@ -144,7 +141,7 @@ func TestTagsServiceFindOneOrCreate(t *testing.T) {
 
 	var count int64
 
-	db.Model(&tags.Tag{}).Count(&count)
+	db.Model(&entities.Tag{}).Count(&count)
 
 	assert.Equal(t, int64(2), count)
 }

@@ -4,11 +4,11 @@ import (
 	"github.com/dot-slash-ann/home-services-api/dtos/categories"
 	"github.com/dot-slash-ann/home-services-api/dtos/tags"
 	"github.com/dot-slash-ann/home-services-api/dtos/vendors"
-	TransactionsEntity "github.com/dot-slash-ann/home-services-api/entities/transactions"
+	"github.com/dot-slash-ann/home-services-api/entities"
 	"github.com/gin-gonic/gin"
 )
 
-func TransactionToJson(transaction TransactionsEntity.Transaction) gin.H {
+func TransactionToJson(transaction entities.Transaction) gin.H {
 	return gin.H{
 		"id":               transaction.ID,
 		"amount":           transaction.Amount,
@@ -21,7 +21,7 @@ func TransactionToJson(transaction TransactionsEntity.Transaction) gin.H {
 	}
 }
 
-func ManyTransactionsToJson(transactions []TransactionsEntity.Transaction) []gin.H {
+func ManyTransactionsToJson(transactions []entities.Transaction) []gin.H {
 	results := make([]gin.H, 0, len(transactions))
 
 	for _, transaction := range transactions {

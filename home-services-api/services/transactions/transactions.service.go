@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	transactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
-	"github.com/dot-slash-ann/home-services-api/entities/transactions"
+	"github.com/dot-slash-ann/home-services-api/entities"
 	"github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/dot-slash-ann/home-services-api/services/tags"
 	"github.com/dot-slash-ann/home-services-api/services/vendors"
@@ -13,12 +13,12 @@ import (
 )
 
 type TransactionsService interface {
-	Create(transactionsDto.CreateTransactionDto) (transactions.Transaction, error)
-	FindAll(map[string]string) ([]transactions.Transaction, error)
-	FindOne(string) (transactions.Transaction, error)
-	Update(string, transactionsDto.UpdateTransactionDto) (transactions.Transaction, error)
-	Delete(string) (transactions.Transaction, error)
-	TagTransaction(transactionsDto.TagTransactionDto, string) (transactions.Transaction, error)
+	Create(transactionsDto.CreateTransactionDto) (entities.Transaction, error)
+	FindAll(map[string]string) ([]entities.Transaction, error)
+	FindOne(string) (entities.Transaction, error)
+	Update(string, transactionsDto.UpdateTransactionDto) (entities.Transaction, error)
+	Delete(string) (entities.Transaction, error)
+	TagTransaction(transactionsDto.TagTransactionDto, string) (entities.Transaction, error)
 }
 
 type TransactionsServiceImpl struct {
@@ -37,20 +37,20 @@ func NewTransactionsService(database *gorm.DB, categoriesService categories.Cate
 	}
 }
 
-func (service *TransactionsServiceImpl) Create(createTransactionDto transactionsDto.CreateTransactionDto) (transactions.Transaction, error) {
+func (service *TransactionsServiceImpl) Create(createTransactionDto transactionsDto.CreateTransactionDto) (entities.Transaction, error) {
 	category, err := service.categoriesService.FindByName(createTransactionDto.CategoryName)
 
 	if err != nil {
-		return transactions.Transaction{}, err
+		return entities.Transaction{}, err
 	}
 
 	vendor, err := service.vendorsService.FindByName(createTransactionDto.VendorName)
 
 	if err != nil {
-		return transactions.Transaction{}, err
+		return entities.Transaction{}, err
 	}
 
-	transaction := transactions.Transaction{
+	transaction := entities.Transaction{
 		TransactionOn:   createTransactionDto.TransactionOn,
 		PostedOn:        createTransactionDto.PostedOn,
 		Amount:          createTransactionDto.Amount,
@@ -60,26 +60,26 @@ func (service *TransactionsServiceImpl) Create(createTransactionDto transactions
 	}
 
 	if result := service.database.Create(&transaction); result.Error != nil {
-		return transactions.Transaction{}, result.Error
+		return entities.Transaction{}, result.Error
 	}
 
 	if result := service.database.Preload("Category").Preload("Tags").Preload("Vendor").First(&transaction, fmt.Sprint(transaction.ID)); result.Error != nil {
-		return transactions.Transaction{}, result.Error
+		return entities.Transaction{}, result.Error
 	}
 
 	return transaction, nil
 }
 
-func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]transactions.Transaction, error) {
-	var transactionsList []transactions.Transaction
+func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]entities.Transaction, error) {
+	var transactionsList []entities.Transaction
 
-	query := service.database.Model(&transactions.Transaction{}).Preload("Category").Preload("Tags").Preload("Vendor")
+	query := service.database.Model(&entities.Transaction{}).Preload("Category").Preload("Tags").Preload("Vendor")
 
 	if categoryName, ok := filters["categoryName"]; ok {
 		category, err := service.categoriesService.FindByName(categoryName)
 
 		if err != nil {
-			return []transactions.Transaction{}, err
+			return []entities.Transaction{}, err
 		}
 
 		query.Where("category_id = ?", category.ID)
@@ -87,7 +87,7 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 		category, err := service.categoriesService.FindOne(categoryID)
 
 		if err != nil {
-			return []transactions.Transaction{}, err
+			return []entities.Transaction{}, err
 		}
 
 		query.Where("category_id = ?", category.ID)
@@ -97,7 +97,7 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 		vendor, err := service.vendorsService.FindOne(vendorID)
 
 		if err != nil {
-			return []transactions.Transaction{}, err
+			return []entities.Transaction{}, err
 		}
 
 		query.Where("vendor_id = ?", vendor.ID)
@@ -139,40 +139,40 @@ func (service *TransactionsServiceImpl) FindAll(filters map[string]string) ([]tr
 	query.Limit(100)
 
 	if result := query.Find(&transactionsList); result.Error != nil {
-		return []transactions.Transaction{}, result.Error
+		return []entities.Transaction{}, result.Error
 	}
 
 	if len(transactionsList) == 0 {
-		return []transactions.Transaction{}, nil
+		return []entities.Transaction{}, nil
 	}
 
 	return transactionsList, nil
 }
 
-func (service *TransactionsServiceImpl) FindOne(id string) (transactions.Transaction, error) {
-	var transaction transactions.Transaction
+func (service *TransactionsServiceImpl) FindOne(id string) (entities.Transaction, error) {
+	var transaction entities.Transaction
 
 	if result := service.database.Preload("Category").Preload("Vendor").Preload("Tags").First(&transaction, id); result.Error != nil {
-		return transactions.Transaction{}, result.Error
+		return entities.Transaction{}, result.Error
 	}
 
 	return transaction, nil
 }
 
-func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto transactionsDto.UpdateTransactionDto) (transactions.Transaction, error) {
-	var transaction transactions.Transaction
+func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto transactionsDto.UpdateTransactionDto) (entities.Transaction, error) {
+	var transaction entities.Transaction
 
 	if result := service.database.First(&transaction, id); result.Error != nil {
-		return transactions.Transaction{}, result.Error
+		return entities.Transaction{}, result.Error
 	}
 
 	category, err := service.categoriesService.FindOne(fmt.Sprint(updateTransactionDto.CategoryId))
 
 	if err != nil && updateTransactionDto.CategoryId != 0 {
-		return transactions.Transaction{}, err
+		return entities.Transaction{}, err
 	}
 
-	updatedTransaction := transactions.Transaction{
+	updatedTransaction := entities.Transaction{
 		TransactionOn: updateTransactionDto.TransactionOn,
 		PostedOn:      updateTransactionDto.PostedOn,
 		Amount:        updateTransactionDto.Amount,
@@ -180,45 +180,45 @@ func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto t
 	}
 
 	if result := service.database.Model(&transaction).Updates(updatedTransaction); result.Error != nil {
-		return transactions.Transaction{}, result.Error
+		return entities.Transaction{}, result.Error
 	}
 
 	if result := service.database.Preload("Category").Preload("Tags").Preload("Vendor").First(&transaction, fmt.Sprint(transaction.ID)); result.Error != nil {
-		return transactions.Transaction{}, result.Error
+		return entities.Transaction{}, result.Error
 	}
 
 	return transaction, nil
 }
 
-func (service *TransactionsServiceImpl) Delete(id string) (transactions.Transaction, error) {
-	var transaction transactions.Transaction
+func (service *TransactionsServiceImpl) Delete(id string) (entities.Transaction, error) {
+	var transaction entities.Transaction
 
 	if result := service.database.Preload("Category").Preload("Tags").Preload("Vendor").First(&transaction, id); result.Error != nil {
-		return transactions.Transaction{}, result.Error
+		return entities.Transaction{}, result.Error
 	}
 
-	if result := service.database.Delete(&transactions.Transaction{}, id); result.Error != nil {
-		return transactions.Transaction{}, result.Error
+	if result := service.database.Delete(&entities.Transaction{}, id); result.Error != nil {
+		return entities.Transaction{}, result.Error
 	}
 
 	return transaction, nil
 }
 
-func (service *TransactionsServiceImpl) TagTransaction(tagTransactionDto transactionsDto.TagTransactionDto, id string) (transactions.Transaction, error) {
-	var transaction transactions.Transaction
+func (service *TransactionsServiceImpl) TagTransaction(tagTransactionDto transactionsDto.TagTransactionDto, id string) (entities.Transaction, error) {
+	var transaction entities.Transaction
 
 	if result := service.database.Preload("Category").Preload("Tags").Preload("Vendor").First(&transaction, id); result.Error != nil {
-		return transactions.Transaction{}, result.Error
+		return entities.Transaction{}, result.Error
 	}
 
 	tag, err := service.tagsService.FindOneOrCreate(tagTransactionDto.TagName)
 
 	if err != nil {
-		return transactions.Transaction{}, err
+		return entities.Transaction{}, err
 	}
 
 	if err := service.database.Model(&transaction).Association("Tags").Append(&tag); err != nil {
-		return transactions.Transaction{}, err
+		return entities.Transaction{}, err
 	}
 
 	return transaction, nil

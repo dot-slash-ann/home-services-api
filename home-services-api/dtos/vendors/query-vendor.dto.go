@@ -1,18 +1,18 @@
 package vendors
 
 import (
-	"github.com/dot-slash-ann/home-services-api/entities/vendors"
+	"github.com/dot-slash-ann/home-services-api/entities"
 	"github.com/gin-gonic/gin"
 )
 
-func VendorToJson(vendor vendors.Vendor) gin.H {
+func VendorToJson(vendor entities.Vendor) gin.H {
 	return gin.H{
 		"id":   vendor.ID,
 		"name": vendor.Name,
 	}
 }
 
-func ManyVendorsToJson(vendors []vendors.Vendor) []gin.H {
+func ManyVendorsToJson(vendors []entities.Vendor) []gin.H {
 	results := make([]gin.H, 0, len(vendors))
 
 	for _, vendor := range vendors {

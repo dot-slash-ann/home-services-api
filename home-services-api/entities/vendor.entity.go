@@ -1,4 +1,4 @@
-package vendors
+package entities
 
 import "gorm.io/gorm"
 

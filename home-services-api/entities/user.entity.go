@@ -1,4 +1,4 @@
-package users
+package entities
 
 import "gorm.io/gorm"
 

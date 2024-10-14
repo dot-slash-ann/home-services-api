@@ -2,17 +2,17 @@ package categories
 
 import (
 	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
-	"github.com/dot-slash-ann/home-services-api/entities/categories"
+	"github.com/dot-slash-ann/home-services-api/entities"
 	"gorm.io/gorm"
 )
 
 type CategoriesService interface {
-	Create(categoriesDto.CreateCategoryDto) (categories.Category, error)
-	FindAll() ([]categories.Category, error)
-	FindOne(string) (categories.Category, error)
-	FindByName(string) (categories.Category, error)
-	Update(string, categoriesDto.UpdateCategoryDto) (categories.Category, error)
-	Delete(string) (categories.Category, error)
+	Create(categoriesDto.CreateCategoryDto) (entities.Category, error)
+	FindAll() ([]entities.Category, error)
+	FindOne(string) (entities.Category, error)
+	FindByName(string) (entities.Category, error)
+	Update(string, categoriesDto.UpdateCategoryDto) (entities.Category, error)
+	Delete(string) (entities.Category, error)
 }
 
 type CategoriesServiceImpl struct {
@@ -25,75 +25,75 @@ func NewCategoriesService(database *gorm.DB) *CategoriesServiceImpl {
 	}
 }
 
-func (service *CategoriesServiceImpl) Create(createCategoryDto categoriesDto.CreateCategoryDto) (categories.Category, error) {
-	category := categories.Category{
+func (service *CategoriesServiceImpl) Create(createCategoryDto categoriesDto.CreateCategoryDto) (entities.Category, error) {
+	category := entities.Category{
 		Name: createCategoryDto.Name,
 	}
 
 	if result := service.database.Create(&category); result.Error != nil {
-		return categories.Category{}, result.Error
+		return entities.Category{}, result.Error
 	}
 
 	return category, nil
 }
 
-func (service *CategoriesServiceImpl) FindAll() ([]categories.Category, error) {
-	var categoriesList []categories.Category
+func (service *CategoriesServiceImpl) FindAll() ([]entities.Category, error) {
+	var categoriesList []entities.Category
 
 	if result := service.database.Find(&categoriesList); result.Error != nil {
-		return []categories.Category{}, result.Error
+		return []entities.Category{}, result.Error
 	}
 
 	return categoriesList, nil
 }
 
-func (service *CategoriesServiceImpl) FindOne(id string) (categories.Category, error) {
-	var category categories.Category
+func (service *CategoriesServiceImpl) FindOne(id string) (entities.Category, error) {
+	var category entities.Category
 
 	if result := service.database.First(&category, id); result.Error != nil {
-		return categories.Category{}, result.Error
+		return entities.Category{}, result.Error
 	}
 
 	return category, nil
 }
 
-func (service *CategoriesServiceImpl) FindByName(name string) (categories.Category, error) {
-	var category categories.Category
+func (service *CategoriesServiceImpl) FindByName(name string) (entities.Category, error) {
+	var category entities.Category
 
 	if result := service.database.First(&category, "name = ?", name); result.Error != nil {
-		return categories.Category{}, result.Error
+		return entities.Category{}, result.Error
 	}
 
 	return category, nil
 }
 
-func (service *CategoriesServiceImpl) Update(id string, updateCategoryDto categoriesDto.UpdateCategoryDto) (categories.Category, error) {
-	var category categories.Category
+func (service *CategoriesServiceImpl) Update(id string, updateCategoryDto categoriesDto.UpdateCategoryDto) (entities.Category, error) {
+	var category entities.Category
 
-	updatedCategory := categories.Category{
+	updatedCategory := entities.Category{
 		Name: updateCategoryDto.Name,
 	}
 
 	if result := service.database.First(&category, id); result.Error != nil {
-		return categories.Category{}, result.Error
+		return entities.Category{}, result.Error
 	}
 
 	if result := service.database.Model(&category).Updates(updatedCategory); result.Error != nil {
-		return categories.Category{}, result.Error
+		return entities.Category{}, result.Error
 	}
 
 	return category, nil
 }
 
-func (service *CategoriesServiceImpl) Delete(id string) (categories.Category, error) {
-	var category categories.Category
+func (service *CategoriesServiceImpl) Delete(id string) (entities.Category, error) {
+	var category entities.Category
 
 	if result := service.database.First(&category, id); result.Error != nil {
-		return categories.Category{}, result.Error
+		return entities.Category{}, result.Error
 	}
 
-	if result := service.database.Delete(&categories.Category{}, id); result.Error != nil {
-		return categories.Category{}, result.Error
+	if result := service.database.Delete(&entities.Category{}, id); result.Error != nil {
+		return entities.Category{}, result.Error
 	}
 
 	return category, nil

@@ -9,7 +9,7 @@ import (
 
 	categoriesController "github.com/dot-slash-ann/home-services-api/controllers/categories"
 	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
-	"github.com/dot-slash-ann/home-services-api/entities/categories"
+	"github.com/dot-slash-ann/home-services-api/entities"
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -20,47 +20,47 @@ type MockCategoriesService struct {
 	mock.Mock
 }
 
-func (m *MockCategoriesService) Create(categoryDto categoriesDto.CreateCategoryDto) (categories.Category, error) {
+func (m *MockCategoriesService) Create(categoryDto categoriesDto.CreateCategoryDto) (entities.Category, error) {
 	args := m.Called(categoryDto)
 
-	return args.Get(0).(categories.Category), args.Error(1)
+	return args.Get(0).(entities.Category), args.Error(1)
 }
 
-func (m *MockCategoriesService) FindAll() ([]categories.Category, error) {
+func (m *MockCategoriesService) FindAll() ([]entities.Category, error) {
 	args := m.Called()
 
-	return args.Get(0).([]categories.Category), args.Error(1)
+	return args.Get(0).([]entities.Category), args.Error(1)
 }
 
-func (m *MockCategoriesService) FindOne(id string) (categories.Category, error) {
+func (m *MockCategoriesService) FindOne(id string) (entities.Category, error) {
 	args := m.Called(id)
 
-	return args.Get(0).(categories.Category), args.Error(1)
+	return args.Get(0).(entities.Category), args.Error(1)
 }
 
-func (m *MockCategoriesService) FindByName(name string) (categories.Category, error) {
+func (m *MockCategoriesService) FindByName(name string) (entities.Category, error) {
 	args := m.Called(name)
 
-	return args.Get(0).(categories.Category), args.Error(1)
+	return args.Get(0).(entities.Category), args.Error(1)
 }
 
-func (m *MockCategoriesService) Update(id string, updateCategoryDto categoriesDto.UpdateCategoryDto) (categories.Category, error) {
+func (m *MockCategoriesService) Update(id string, updateCategoryDto categoriesDto.UpdateCategoryDto) (entities.Category, error) {
 	args := m.Called(id, updateCategoryDto)
 
-	return args.Get(0).(categories.Category), args.Error(1)
+	return args.Get(0).(entities.Category), args.Error(1)
 }
 
-func (m *MockCategoriesService) Delete(id string) (categories.Category, error) {
+func (m *MockCategoriesService) Delete(id string) (entities.Category, error) {
 	args := m.Called(id)
 
-	return args.Get(0).(categories.Category), args.Error(1)
+	return args.Get(0).(entities.Category), args.Error(1)
 }
 
 func TestCategoriesControllerCreate(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockService := new(MockCategoriesService)
 
-	mockService.On("Create", mock.AnythingOfType("CreateCategoryDto")).Return(categories.Category{}, nil)
+	mockService.On("Create", mock.AnythingOfType("CreateCategoryDto")).Return(entities.Category{}, nil)
 
 	controller := categoriesController.NewCategoriesController(mockService)
 
@@ -88,7 +88,7 @@ func TestCategoriesControllerFindAll(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockService := new(MockCategoriesService)
 
-	mockService.On("FindAll").Return([]categories.Category{}, nil)
+	mockService.On("FindAll").Return([]entities.Category{}, nil)
 
 	controller := categoriesController.NewCategoriesController(mockService)
 
@@ -109,7 +109,7 @@ func TestCategoriesControllerFindOne(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockService := new(MockCategoriesService)
 
-	mockService.On("FindOne", "1").Return(categories.Category{}, nil)
+	mockService.On("FindOne", "1").Return(entities.Category{}, nil)
 
 	controller := categoriesController.NewCategoriesController(mockService)
 
@@ -131,7 +131,7 @@ func TestCategoriesControllerFindOneNotFound(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockService := new(MockCategoriesService)
 
-	mockService.On("FindOne", "1").Return(categories.Category{}, errors.New("record not found"))
+	mockService.On("FindOne", "1").Return(entities.Category{}, errors.New("record not found"))
 
 	controller := categoriesController.NewCategoriesController(mockService)
 
@@ -155,7 +155,7 @@ func TestCategoriesControllerUpdate(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockService := new(MockCategoriesService)
 
-	mockService.On("Update", "1", mock.AnythingOfType("UpdateCategoryDto")).Return(categories.Category{}, nil)
+	mockService.On("Update", "1", mock.AnythingOfType("UpdateCategoryDto")).Return(entities.Category{}, nil)
 
 	controller := categoriesController.NewCategoriesController(mockService)
 
@@ -183,7 +183,7 @@ func TestCategoriesControllerDelete(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	mockService := new(MockCategoriesService)
 
-	mockService.On("Delete", "1").Return(categories.Category{}, nil)
+	mockService.On("Delete", "1").Return(entities.Category{}, nil)
 
 	controller := categoriesController.NewCategoriesController(mockService)
 

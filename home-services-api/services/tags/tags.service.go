@@ -4,17 +4,17 @@ import (
 	"log"
 
 	tagsDto "github.com/dot-slash-ann/home-services-api/dtos/tags"
-	"github.com/dot-slash-ann/home-services-api/entities/tags"
+	"github.com/dot-slash-ann/home-services-api/entities"
 	"gorm.io/gorm"
 )
 
 type TagsService interface {
-	Create(tagsDto.CreateTagDto) (tags.Tag, error)
-	FindAll() ([]tags.Tag, error)
-	FindOne(string) (tags.Tag, error)
-	Update(string, tagsDto.UpdateTagDto) (tags.Tag, error)
-	Delete(string) (tags.Tag, error)
-	FindOneOrCreate(string) (tags.Tag, error)
+	Create(tagsDto.CreateTagDto) (entities.Tag, error)
+	FindAll() ([]entities.Tag, error)
+	FindOne(string) (entities.Tag, error)
+	Update(string, tagsDto.UpdateTagDto) (entities.Tag, error)
+	Delete(string) (entities.Tag, error)
+	FindOneOrCreate(string) (entities.Tag, error)
 }
 
 type TagsServiceImpl struct {
@@ -27,43 +27,43 @@ func NewTagsService(database *gorm.DB) *TagsServiceImpl {
 	}
 }
 
-func (service *TagsServiceImpl) Create(createTagDto tagsDto.CreateTagDto) (tags.Tag, error) {
-	tag := tags.Tag{
+func (service *TagsServiceImpl) Create(createTagDto tagsDto.CreateTagDto) (entities.Tag, error) {
+	tag := entities.Tag{
 		Name: createTagDto.Name,
 	}
 
 	if result := service.database.Create(&tag); result.Error != nil {
-		return tags.Tag{}, result.Error
+		return entities.Tag{}, result.Error
 	}
 
 	return tag, nil
 }
 
-func (service *TagsServiceImpl) FindAll() ([]tags.Tag, error) {
-	var tagList []tags.Tag
+func (service *TagsServiceImpl) FindAll() ([]entities.Tag, error) {
+	var tagList []entities.Tag
 
 	if results := service.database.Find(&tagList); results.Error != nil {
-		return []tags.Tag{}, results.Error
+		return []entities.Tag{}, results.Error
 	}
 
 	return tagList, nil
 }
 
-func (service *TagsServiceImpl) FindOne(id string) (tags.Tag, error) {
-	var tag tags.Tag
+func (service *TagsServiceImpl) FindOne(id string) (entities.Tag, error) {
+	var tag entities.Tag
 
 	if result := service.database.First(&tag, id); result.Error != nil {
-		return tags.Tag{}, result.Error
+		return entities.Tag{}, result.Error
 	}
 
 	return tag, nil
 }
 
-func (service *TagsServiceImpl) FindOneOrCreate(name string) (tags.Tag, error) {
-	var tag tags.Tag
+func (service *TagsServiceImpl) FindOneOrCreate(name string) (entities.Tag, error) {
+	var tag entities.Tag
 
-	if result := service.database.FirstOrCreate(&tag, tags.Tag{Name: name}); result.Error != nil {
-		return tags.Tag{}, result.Error
+	if result := service.database.FirstOrCreate(&tag, entities.Tag{Name: name}); result.Error != nil {
+		return entities.Tag{}, result.Error
 	}
 
 	log.Default().Println("service FindOneOrCreate - ", tag.Name, tag.ID)
@@ -71,30 +71,30 @@ func (service *TagsServiceImpl) FindOneOrCreate(name string) (tags.Tag, error) {
 	return tag, nil
 }
 
-func (service *TagsServiceImpl) Update(id string, updateTagDto tagsDto.UpdateTagDto) (tags.Tag, error) {
-	var tag tags.Tag
+func (service *TagsServiceImpl) Update(id string, updateTagDto tagsDto.UpdateTagDto) (entities.Tag, error) {
+	var tag entities.Tag
 
 	if result := service.database.First(&tag, id); result.Error != nil {
-		return tags.Tag{}, result.Error
+		return entities.Tag{}, result.Error
 	}
 
-	if result := service.database.Model(&tag).Updates(tags.Tag{
+	if result := service.database.Model(&tag).Updates(entities.Tag{
 		Name: updateTagDto.Name,
 	}); result.Error != nil {
-		return tags.Tag{}, result.Error
+		return entities.Tag{}, result.Error
 	}
 
 	return tag, nil
 }
 
-func (service *TagsServiceImpl) Delete(id string) (tags.Tag, error) {
-	var tag tags.Tag
+func (service *TagsServiceImpl) Delete(id string) (entities.Tag, error) {
+	var tag entities.Tag
 
 	if result := service.database.First(&tag, id); result.Error != nil {
-		return tags.Tag{}, result.Error
+		return entities.Tag{}, result.Error
 	}
 
-	service.database.Delete(&tags.Tag{}, id)
+	service.database.Delete(&entities.Tag{}, id)
 
 	return tag, nil
 }

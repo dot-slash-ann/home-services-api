@@ -6,10 +6,7 @@ import (
 	"testing"
 
 	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
-	"github.com/dot-slash-ann/home-services-api/entities/categories"
-	"github.com/dot-slash-ann/home-services-api/entities/tags"
-	"github.com/dot-slash-ann/home-services-api/entities/transactions"
-	"github.com/dot-slash-ann/home-services-api/entities/users"
+	"github.com/dot-slash-ann/home-services-api/entities"
 	categoriesService "github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
@@ -23,10 +20,10 @@ func setupTestDB() *gorm.DB {
 		log.Fatalf("failed to connect to in-memory SQLite database: %v", err)
 	}
 
-	db.AutoMigrate(&categories.Category{})
-	db.AutoMigrate(&tags.Tag{})
-	db.AutoMigrate(&transactions.Transaction{})
-	db.AutoMigrate(&users.User{})
+	db.AutoMigrate(&entities.Category{})
+	db.AutoMigrate(&entities.Tag{})
+	db.AutoMigrate(&entities.Transaction{})
+	db.AutoMigrate(&entities.User{})
 
 	return db
 }
@@ -38,8 +35,8 @@ func getService() (categoriesService.CategoriesService, *gorm.DB) {
 	return categoriesService, db
 }
 
-func create(t *testing.T, service categoriesService.CategoriesService, names []string) []categories.Category {
-	categoriesList := make([]categories.Category, len(names))
+func create(t *testing.T, service categoriesService.CategoriesService, names []string) []entities.Category {
+	categoriesList := make([]entities.Category, len(names))
 
 	for _, name := range names {
 		createCategoryDto := categoriesDto.CreateCategoryDto{
@@ -68,7 +65,7 @@ func TestCategoriesServiceCreate(t *testing.T) {
 	category, err := categoriesService.Create(createCategoryDto)
 
 	var count int64
-	db.Model(&categories.Category{}).Count(&count)
+	db.Model(&entities.Category{}).Count(&count)
 
 	if err != nil {
 		t.Errorf("expected no error, but got: %v", err)
