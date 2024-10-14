@@ -84,6 +84,7 @@ func main() {
 	router.POST("api/budgets", budgetsController.Create)
 	router.GET("api/budgets", budgetsController.FindAll)
 	router.GET("api/budgets/:id", budgetsController.FindOne)
+	router.DELETE("api/budgets/:id", budgetsController.Delete)
 	router.POST("api/budgets/:id/category", budgetsController.AddCategory)
 
 	usersService := users.NewUsersService(database.Connection)

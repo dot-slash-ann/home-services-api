@@ -97,6 +97,40 @@ func (controller *BudgetsController) FindOne(c *gin.Context) {
 	})
 }
 
+func (controller *BudgetsController) Delete(c *gin.Context) {
+	id, found := c.Params.Get("id")
+
+	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	budget, err := controller.budgetsService.Delete(id)
+
+	if err != nil {
+		httpErr := httpErrors.NotFoundError(err, nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": budgetsDto.BudgetToJson(budget),
+	})
+}
+
 func (controller *BudgetsController) AddCategory(c *gin.Context) {
 	id, found := c.Params.Get("id")
 

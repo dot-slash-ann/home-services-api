@@ -12,6 +12,7 @@ type BudgetsService interface {
 	FindAll() ([]entities.Budget, error)
 	FindOne(string) (entities.Budget, error)
 	FindByName(string) (entities.Budget, error)
+	Delete(string) (entities.Budget, error)
 	AddCategory(budgets.AddCategoryDto, string) (entities.Budget, error)
 }
 
@@ -63,6 +64,20 @@ func (service *BudgetsServiceImpl) FindByName(name string) (entities.Budget, err
 	var budget entities.Budget
 
 	if results := service.database.Preload("Categories").First(&budget, "name = ?", name); results.Error != nil {
+		return entities.Budget{}, results.Error
+	}
+
+	return budget, nil
+}
+
+func (service *BudgetsServiceImpl) Delete(id string) (entities.Budget, error) {
+	budget, err := service.FindOne(id)
+
+	if err != nil {
+		return entities.Budget{}, err
+	}
+
+	if results := service.database.Delete(&entities.Budget{}, id); results.Error != nil {
 		return entities.Budget{}, results.Error
 	}
 
