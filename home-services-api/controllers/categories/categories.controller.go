@@ -7,15 +7,15 @@ import (
 	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
 	"github.com/dot-slash-ann/home-services-api/lib"
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
-	categoriesService "github.com/dot-slash-ann/home-services-api/services/categories"
+	"github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/gin-gonic/gin"
 )
 
 type CategoriesController struct {
-	categoriesService categoriesService.CategoriesService
+	categoriesService categories.CategoriesService
 }
 
-func NewCategoriesController(service categoriesService.CategoriesService) *CategoriesController {
+func NewCategoriesController(service categories.CategoriesService) *CategoriesController {
 	return &CategoriesController{
 		categoriesService: service,
 	}

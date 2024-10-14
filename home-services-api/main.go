@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	budgetsController "github.com/dot-slash-ann/home-services-api/controllers/budgets"
 	categoriesController "github.com/dot-slash-ann/home-services-api/controllers/categories"
 	tagsController "github.com/dot-slash-ann/home-services-api/controllers/tags"
 	transactionsController "github.com/dot-slash-ann/home-services-api/controllers/transactions"
@@ -11,6 +12,7 @@ import (
 	"github.com/dot-slash-ann/home-services-api/database"
 	"github.com/dot-slash-ann/home-services-api/initializers"
 	"github.com/dot-slash-ann/home-services-api/middleware"
+	"github.com/dot-slash-ann/home-services-api/services/budgets"
 	"github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/dot-slash-ann/home-services-api/services/tags"
 	"github.com/dot-slash-ann/home-services-api/services/transactions"
@@ -75,6 +77,14 @@ func main() {
 	router.PATCH("api/transactions/:id", transactionsController.Update)
 	router.DELETE("api/transactions/:id", transactionsController.Delete)
 	router.POST("api/transaction/:id/tag", transactionsController.TagTransaction)
+
+	budgetsService := budgets.NewBudgetsService(database.Connection, categoriesService)
+	budgetsController := budgetsController.NewBudgetsController(budgetsService)
+
+	router.POST("api/budgets", budgetsController.Create)
+	router.GET("api/budgets", budgetsController.FindAll)
+	router.GET("api/budgets/:id", budgetsController.FindOne)
+	router.POST("api/budgets/:id/category", budgetsController.AddCategory)
 
 	usersService := users.NewUsersService(database.Connection)
 	usersController := usersController.NewUsersController(usersService)
