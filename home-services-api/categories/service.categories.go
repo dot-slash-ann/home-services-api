@@ -1,17 +1,16 @@
 package categories
 
 import (
-	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
 	"github.com/dot-slash-ann/home-services-api/entities"
 	"gorm.io/gorm"
 )
 
 type CategoriesService interface {
-	Create(categoriesDto.CreateCategoryDto) (entities.Category, error)
+	Create(CreateCategoryDto) (entities.Category, error)
 	FindAll() ([]entities.Category, error)
 	FindOne(string) (entities.Category, error)
 	FindByName(string) (entities.Category, error)
-	Update(string, categoriesDto.UpdateCategoryDto) (entities.Category, error)
+	Update(string, UpdateCategoryDto) (entities.Category, error)
 	Delete(string) (entities.Category, error)
 }
 
@@ -25,7 +24,7 @@ func NewCategoriesService(database *gorm.DB) *CategoriesServiceImpl {
 	}
 }
 
-func (service *CategoriesServiceImpl) Create(createCategoryDto categoriesDto.CreateCategoryDto) (entities.Category, error) {
+func (service *CategoriesServiceImpl) Create(createCategoryDto CreateCategoryDto) (entities.Category, error) {
 	category := entities.Category{
 		Name: createCategoryDto.Name,
 	}
@@ -67,7 +66,7 @@ func (service *CategoriesServiceImpl) FindByName(name string) (entities.Category
 	return category, nil
 }
 
-func (service *CategoriesServiceImpl) Update(id string, updateCategoryDto categoriesDto.UpdateCategoryDto) (entities.Category, error) {
+func (service *CategoriesServiceImpl) Update(id string, updateCategoryDto UpdateCategoryDto) (entities.Category, error) {
 	var category entities.Category
 
 	updatedCategory := entities.Category{

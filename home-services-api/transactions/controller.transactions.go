@@ -4,25 +4,23 @@ import (
 	"errors"
 	"net/http"
 
-	transactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
 	"github.com/dot-slash-ann/home-services-api/lib"
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
-	"github.com/dot-slash-ann/home-services-api/services/transactions"
 	"github.com/gin-gonic/gin"
 )
 
 type TransactionsController struct {
-	transactionsService transactions.TransactionsService
+	transactionsService TransactionsService
 }
 
-func NewTransactionsController(transactionsService transactions.TransactionsService) *TransactionsController {
+func NewTransactionsController(transactionsService TransactionsService) *TransactionsController {
 	return &TransactionsController{
 		transactionsService: transactionsService,
 	}
 }
 
 func (controller *TransactionsController) Create(c *gin.Context) {
-	var createTransactionDto transactionsDto.CreateTransactionDto
+	var createTransactionDto CreateTransactionDto
 
 	if !lib.HandleDecodeTime(c, &createTransactionDto) {
 		return
@@ -39,7 +37,7 @@ func (controller *TransactionsController) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"data": transactionsDto.TransactionToJson(transaction),
+		"data": TransactionToJson(transaction),
 	})
 }
 
@@ -101,7 +99,7 @@ func (controller *TransactionsController) FindAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": transactionsDto.ManyTransactionsToJson(transactionsList),
+		"data": ManyTransactionsToJson(transactionsList),
 	})
 }
 
@@ -134,7 +132,7 @@ func (controller *TransactionsController) FindOne(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": transactionsDto.TransactionToJson(transaction),
+		"data": TransactionToJson(transaction),
 	})
 }
 
@@ -157,7 +155,7 @@ func (controller *TransactionsController) Update(c *gin.Context) {
 		return
 	}
 
-	var updateTransactionDto transactionsDto.UpdateTransactionDto
+	var updateTransactionDto UpdateTransactionDto
 
 	if !lib.HandleDecodeTime(c, &updateTransactionDto) {
 		return
@@ -172,7 +170,7 @@ func (controller *TransactionsController) Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": transactionsDto.TransactionToJson(transaction),
+		"data": TransactionToJson(transaction),
 	})
 }
 
@@ -204,7 +202,7 @@ func (controller *TransactionsController) Delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": transactionsDto.TransactionToJson(transaction),
+		"data": TransactionToJson(transaction),
 	})
 }
 
@@ -227,7 +225,7 @@ func (controller *TransactionsController) TagTransaction(c *gin.Context) {
 		return
 	}
 
-	var tagTransactionDto transactionsDto.TagTransactionDto
+	var tagTransactionDto TagTransactionDto
 
 	if err := c.ShouldBind(&tagTransactionDto); err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
@@ -248,6 +246,6 @@ func (controller *TransactionsController) TagTransaction(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": transactionsDto.TransactionToJson(transaction),
+		"data": TransactionToJson(transaction),
 	})
 }

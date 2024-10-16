@@ -7,8 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	categoriesController "github.com/dot-slash-ann/home-services-api/controllers/categories"
-	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
+	"github.com/dot-slash-ann/home-services-api/categories"
 	"github.com/dot-slash-ann/home-services-api/entities"
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
 	"github.com/gin-gonic/gin"
@@ -20,7 +19,7 @@ type MockCategoriesService struct {
 	mock.Mock
 }
 
-func (m *MockCategoriesService) Create(categoryDto categoriesDto.CreateCategoryDto) (entities.Category, error) {
+func (m *MockCategoriesService) Create(categoryDto categories.CreateCategoryDto) (entities.Category, error) {
 	args := m.Called(categoryDto)
 
 	return args.Get(0).(entities.Category), args.Error(1)
@@ -44,7 +43,7 @@ func (m *MockCategoriesService) FindByName(name string) (entities.Category, erro
 	return args.Get(0).(entities.Category), args.Error(1)
 }
 
-func (m *MockCategoriesService) Update(id string, updateCategoryDto categoriesDto.UpdateCategoryDto) (entities.Category, error) {
+func (m *MockCategoriesService) Update(id string, updateCategoryDto categories.UpdateCategoryDto) (entities.Category, error) {
 	args := m.Called(id, updateCategoryDto)
 
 	return args.Get(0).(entities.Category), args.Error(1)
@@ -62,7 +61,7 @@ func TestCategoriesControllerCreate(t *testing.T) {
 
 	mockService.On("Create", mock.AnythingOfType("CreateCategoryDto")).Return(entities.Category{}, nil)
 
-	controller := categoriesController.NewCategoriesController(mockService)
+	controller := categories.NewCategoriesController(mockService)
 
 	router := gin.Default()
 	router.POST("/test_create", controller.Create)
@@ -80,7 +79,7 @@ func TestCategoriesControllerCreate(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, recorder.Code)
 
 	mockService.AssertNumberOfCalls(t, "Create", 1)
-	mockService.AssertCalled(t, "Create", categoriesDto.CreateCategoryDto{Name: "mock category"})
+	mockService.AssertCalled(t, "Create", categories.CreateCategoryDto{Name: "mock category"})
 	mockService.AssertExpectations(t)
 }
 
@@ -90,7 +89,7 @@ func TestCategoriesControllerFindAll(t *testing.T) {
 
 	mockService.On("FindAll").Return([]entities.Category{}, nil)
 
-	controller := categoriesController.NewCategoriesController(mockService)
+	controller := categories.NewCategoriesController(mockService)
 
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
@@ -111,7 +110,7 @@ func TestCategoriesControllerFindOne(t *testing.T) {
 
 	mockService.On("FindOne", "1").Return(entities.Category{}, nil)
 
-	controller := categoriesController.NewCategoriesController(mockService)
+	controller := categories.NewCategoriesController(mockService)
 
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
@@ -133,7 +132,7 @@ func TestCategoriesControllerFindOneNotFound(t *testing.T) {
 
 	mockService.On("FindOne", "1").Return(entities.Category{}, errors.New("record not found"))
 
-	controller := categoriesController.NewCategoriesController(mockService)
+	controller := categories.NewCategoriesController(mockService)
 
 	recorder := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(recorder)
@@ -157,7 +156,7 @@ func TestCategoriesControllerUpdate(t *testing.T) {
 
 	mockService.On("Update", "1", mock.AnythingOfType("UpdateCategoryDto")).Return(entities.Category{}, nil)
 
-	controller := categoriesController.NewCategoriesController(mockService)
+	controller := categories.NewCategoriesController(mockService)
 
 	router := gin.Default()
 	router.PATCH("/test_update/:id", controller.Update)
@@ -175,7 +174,7 @@ func TestCategoriesControllerUpdate(t *testing.T) {
 	assert.Equal(t, http.StatusOK, recorder.Code)
 
 	mockService.AssertNumberOfCalls(t, "Update", 1)
-	mockService.AssertCalled(t, "Update", "1", categoriesDto.UpdateCategoryDto{Name: "new name"})
+	mockService.AssertCalled(t, "Update", "1", categories.UpdateCategoryDto{Name: "new name"})
 	mockService.AssertExpectations(t)
 }
 
@@ -185,7 +184,7 @@ func TestCategoriesControllerDelete(t *testing.T) {
 
 	mockService.On("Delete", "1").Return(entities.Category{}, nil)
 
-	controller := categoriesController.NewCategoriesController(mockService)
+	controller := categories.NewCategoriesController(mockService)
 
 	router := gin.Default()
 	router.DELETE("/test_delete/:id", controller.Delete)

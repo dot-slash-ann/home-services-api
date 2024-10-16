@@ -5,9 +5,8 @@ import (
 	"log"
 	"testing"
 
-	tagsDto "github.com/dot-slash-ann/home-services-api/dtos/tags"
 	"github.com/dot-slash-ann/home-services-api/entities"
-	tagsService "github.com/dot-slash-ann/home-services-api/services/tags"
+	"github.com/dot-slash-ann/home-services-api/tags"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -28,18 +27,18 @@ func setupTestDB() *gorm.DB {
 	return db
 }
 
-func getService() (tagsService.TagsService, *gorm.DB) {
+func getService() (tags.TagsService, *gorm.DB) {
 	db := setupTestDB()
-	tagsService := tagsService.NewTagsService(db)
+	tagsService := tags.NewTagsService(db)
 
 	return tagsService, db
 }
 
-func create(t *testing.T, service tagsService.TagsService, names []string) []entities.Tag {
+func create(t *testing.T, service tags.TagsService, names []string) []entities.Tag {
 	tagsList := make([]entities.Tag, len(names))
 
 	for _, name := range names {
-		createTagDto := tagsDto.CreateTagDto{
+		createTagDto := tags.CreateTagDto{
 			Name: name,
 		}
 
@@ -58,7 +57,7 @@ func create(t *testing.T, service tagsService.TagsService, names []string) []ent
 func TestTagsServiceCreate(t *testing.T) {
 	tagsService, db := getService()
 
-	createTagDto := tagsDto.CreateTagDto{
+	createTagDto := tags.CreateTagDto{
 		Name: "mock tag",
 	}
 
@@ -155,7 +154,7 @@ func TestTagsServiceUpdate(t *testing.T) {
 
 	assert.Equal(t, "old name", tag.Name)
 
-	tag, err := tagsService.Update("1", tagsDto.UpdateTagDto{
+	tag, err := tagsService.Update("1", tags.UpdateTagDto{
 		Name: "new name",
 	})
 

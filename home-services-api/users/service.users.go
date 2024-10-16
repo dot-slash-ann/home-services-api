@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	usersDto "github.com/dot-slash-ann/home-services-api/dtos/users"
 	"github.com/dot-slash-ann/home-services-api/entities"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -12,11 +11,11 @@ import (
 )
 
 type UsersService interface {
-	SignUp(usersDto.CreateUserDto) (entities.User, error)
-	Login(usersDto.LoginUserDto) (entities.User, string, error)
+	SignUp(CreateUserDto) (entities.User, error)
+	Login(LoginUserDto) (entities.User, string, error)
 	FindAll() ([]entities.User, error)
 	FindOne(string) (entities.User, error)
-	Update(string, usersDto.UpdateUserDto) (entities.User, error)
+	Update(string, UpdateUserDto) (entities.User, error)
 }
 
 type UsersServiceImpl struct {
@@ -29,7 +28,7 @@ func NewUsersService(database *gorm.DB) *UsersServiceImpl {
 	}
 }
 
-func (service UsersServiceImpl) SignUp(createUserDto usersDto.CreateUserDto) (entities.User, error) {
+func (service UsersServiceImpl) SignUp(createUserDto CreateUserDto) (entities.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(createUserDto.Password), 10)
 
 	if err != nil {
@@ -48,7 +47,7 @@ func (service UsersServiceImpl) SignUp(createUserDto usersDto.CreateUserDto) (en
 	return user, nil
 }
 
-func (service UsersServiceImpl) Login(loginUserDto usersDto.LoginUserDto) (entities.User, string, error) {
+func (service UsersServiceImpl) Login(loginUserDto LoginUserDto) (entities.User, string, error) {
 	var user entities.User
 
 	if result := service.database.First(&user, "email = ?", loginUserDto.Email); result.Error != nil {
@@ -101,7 +100,7 @@ func (service UsersServiceImpl) FindOne(id string) (entities.User, error) {
 	return user, nil
 }
 
-func (service UsersServiceImpl) Update(id string, updateUserDto usersDto.UpdateUserDto) (entities.User, error) {
+func (service UsersServiceImpl) Update(id string, updateUserDto UpdateUserDto) (entities.User, error) {
 	var user entities.User
 
 	updatedUser := entities.User{

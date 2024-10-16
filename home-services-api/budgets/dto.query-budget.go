@@ -1,7 +1,7 @@
 package budgets
 
 import (
-	"github.com/dot-slash-ann/home-services-api/dtos/categories"
+	"github.com/dot-slash-ann/home-services-api/categories"
 	"github.com/dot-slash-ann/home-services-api/entities"
 	"github.com/gin-gonic/gin"
 )

@@ -1,30 +1,28 @@
-package budgets
+package tags
 
 import (
 	"errors"
 	"net/http"
 
-	budgetsDto "github.com/dot-slash-ann/home-services-api/dtos/budgets"
 	"github.com/dot-slash-ann/home-services-api/lib"
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
-	"github.com/dot-slash-ann/home-services-api/services/budgets"
 	"github.com/gin-gonic/gin"
 )
 
-type BudgetsController struct {
-	budgetsService budgets.BudgetsService
+type TagsController struct {
+	tagsService TagsService
 }
 
-func NewBudgetsController(service budgets.BudgetsService) *BudgetsController {
-	return &BudgetsController{
-		budgetsService: service,
+func NewTagsController(service TagsService) *TagsController {
+	return &TagsController{
+		tagsService: service,
 	}
 }
 
-func (controller *BudgetsController) Create(c *gin.Context) {
-	var createBudgetDto budgetsDto.CreateBudgetDto
+func (controller *TagsController) Create(c *gin.Context) {
+	var createTagDto CreateTagDto
 
-	if err := c.ShouldBind(&createBudgetDto); err != nil {
+	if err := c.ShouldBind(&createTagDto); err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
 
 		c.Error(httpErr)
@@ -32,7 +30,7 @@ func (controller *BudgetsController) Create(c *gin.Context) {
 		return
 	}
 
-	budget, err := controller.budgetsService.Create(createBudgetDto)
+	tag, err := controller.tagsService.Create(createTagDto)
 
 	if err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
@@ -43,12 +41,12 @@ func (controller *BudgetsController) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"data": budgetsDto.BudgetToJson(budget),
+		"data": TagToJson(tag),
 	})
 }
 
-func (controller *BudgetsController) FindAll(c *gin.Context) {
-	budgets, err := controller.budgetsService.FindAll()
+func (controller *TagsController) FindAll(c *gin.Context) {
+	tags, err := controller.tagsService.FindAll()
 
 	if err != nil {
 		httpErr := httpErrors.InternalServerError(err, nil)
@@ -59,11 +57,11 @@ func (controller *BudgetsController) FindAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": budgetsDto.ManyBudgetsToJson(budgets),
+		"data": ManyTagsToJson(tags),
 	})
 }
 
-func (controller *BudgetsController) FindOne(c *gin.Context) {
+func (controller *TagsController) FindOne(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -82,7 +80,7 @@ func (controller *BudgetsController) FindOne(c *gin.Context) {
 		return
 	}
 
-	budget, err := controller.budgetsService.FindOne(id)
+	tag, err := controller.tagsService.FindOne(id)
 
 	if err != nil {
 		httpErr := httpErrors.NotFoundError(err, nil)
@@ -93,11 +91,11 @@ func (controller *BudgetsController) FindOne(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": budgetsDto.BudgetToJson(budget),
+		"data": TagToJson(tag),
 	})
 }
 
-func (controller *BudgetsController) Delete(c *gin.Context) {
+func (controller *TagsController) Update(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -115,44 +113,9 @@ func (controller *BudgetsController) Delete(c *gin.Context) {
 
 		return
 	}
+	var updateTagDto UpdateTagDto
 
-	budget, err := controller.budgetsService.Delete(id)
-
-	if err != nil {
-		httpErr := httpErrors.NotFoundError(err, nil)
-
-		c.Error(httpErr)
-
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"data": budgetsDto.BudgetToJson(budget),
-	})
-}
-
-func (controller *BudgetsController) AddCategory(c *gin.Context) {
-	id, found := c.Params.Get("id")
-
-	if !found {
-		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
-
-		c.Error(httpErr)
-
-		return
-	}
-
-	if !lib.IsNumeric(id) {
-		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
-
-		c.Error(httpErr)
-
-		return
-	}
-
-	var addCategoryDto budgetsDto.AddCategoryDto
-
-	if err := c.ShouldBind(&addCategoryDto); err != nil {
+	if err := c.ShouldBind(&updateTagDto); err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
 
 		c.Error(httpErr)
@@ -160,17 +123,49 @@ func (controller *BudgetsController) AddCategory(c *gin.Context) {
 		return
 	}
 
-	budget, err := controller.budgetsService.AddCategory(addCategoryDto, id)
+	tag, err := controller.tagsService.Update(id, updateTagDto)
 
 	if err != nil {
-		httpErr := httpErrors.InternalServerError(err, nil)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"data": TagToJson(tag),
+	})
+}
+
+func (controller *TagsController) Delete(c *gin.Context) {
+	id, found := c.Params.Get("id")
+
+	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
 
 		c.Error(httpErr)
 
 		return
 	}
 
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	tag, err := controller.tagsService.Delete(id)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{})
+
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"data": budgetsDto.BudgetToJson(budget),
+		"data": TagToJson(tag),
 	})
 }

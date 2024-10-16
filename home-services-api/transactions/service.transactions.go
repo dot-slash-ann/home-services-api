@@ -4,21 +4,20 @@ import (
 	"fmt"
 	"strings"
 
-	transactionsDto "github.com/dot-slash-ann/home-services-api/dtos/transactions"
+	"github.com/dot-slash-ann/home-services-api/categories"
 	"github.com/dot-slash-ann/home-services-api/entities"
-	"github.com/dot-slash-ann/home-services-api/services/categories"
-	"github.com/dot-slash-ann/home-services-api/services/tags"
-	"github.com/dot-slash-ann/home-services-api/services/vendors"
+	"github.com/dot-slash-ann/home-services-api/tags"
+	"github.com/dot-slash-ann/home-services-api/vendors"
 	"gorm.io/gorm"
 )
 
 type TransactionsService interface {
-	Create(transactionsDto.CreateTransactionDto) (entities.Transaction, error)
+	Create(CreateTransactionDto) (entities.Transaction, error)
 	FindAll(map[string]string) ([]entities.Transaction, error)
 	FindOne(string) (entities.Transaction, error)
-	Update(string, transactionsDto.UpdateTransactionDto) (entities.Transaction, error)
+	Update(string, UpdateTransactionDto) (entities.Transaction, error)
 	Delete(string) (entities.Transaction, error)
-	TagTransaction(transactionsDto.TagTransactionDto, string) (entities.Transaction, error)
+	TagTransaction(TagTransactionDto, string) (entities.Transaction, error)
 }
 
 type TransactionsServiceImpl struct {
@@ -37,7 +36,7 @@ func NewTransactionsService(database *gorm.DB, categoriesService categories.Cate
 	}
 }
 
-func (service *TransactionsServiceImpl) Create(createTransactionDto transactionsDto.CreateTransactionDto) (entities.Transaction, error) {
+func (service *TransactionsServiceImpl) Create(createTransactionDto CreateTransactionDto) (entities.Transaction, error) {
 	category, err := service.categoriesService.FindByName(createTransactionDto.CategoryName)
 
 	if err != nil {
@@ -159,7 +158,7 @@ func (service *TransactionsServiceImpl) FindOne(id string) (entities.Transaction
 	return transaction, nil
 }
 
-func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto transactionsDto.UpdateTransactionDto) (entities.Transaction, error) {
+func (service *TransactionsServiceImpl) Update(id string, updateTransactionDto UpdateTransactionDto) (entities.Transaction, error) {
 	var transaction entities.Transaction
 
 	if result := service.database.First(&transaction, id); result.Error != nil {
@@ -204,7 +203,7 @@ func (service *TransactionsServiceImpl) Delete(id string) (entities.Transaction,
 	return transaction, nil
 }
 
-func (service *TransactionsServiceImpl) TagTransaction(tagTransactionDto transactionsDto.TagTransactionDto, id string) (entities.Transaction, error) {
+func (service *TransactionsServiceImpl) TagTransaction(tagTransactionDto TagTransactionDto, id string) (entities.Transaction, error) {
 	var transaction entities.Transaction
 
 	if result := service.database.Preload("Category").Preload("Tags").Preload("Vendor").First(&transaction, id); result.Error != nil {

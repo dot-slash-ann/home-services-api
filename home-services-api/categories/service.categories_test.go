@@ -5,9 +5,8 @@ import (
 	"log"
 	"testing"
 
-	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
+	"github.com/dot-slash-ann/home-services-api/categories"
 	"github.com/dot-slash-ann/home-services-api/entities"
-	categoriesService "github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -28,18 +27,18 @@ func setupTestDB() *gorm.DB {
 	return db
 }
 
-func getService() (categoriesService.CategoriesService, *gorm.DB) {
+func getService() (categories.CategoriesService, *gorm.DB) {
 	db := setupTestDB()
-	categoriesService := categoriesService.NewCategoriesService(db)
+	categoriesService := categories.NewCategoriesService(db)
 
 	return categoriesService, db
 }
 
-func create(t *testing.T, service categoriesService.CategoriesService, names []string) []entities.Category {
+func create(t *testing.T, service categories.CategoriesService, names []string) []entities.Category {
 	categoriesList := make([]entities.Category, len(names))
 
 	for _, name := range names {
-		createCategoryDto := categoriesDto.CreateCategoryDto{
+		createCategoryDto := categories.CreateCategoryDto{
 			Name: name,
 		}
 
@@ -58,7 +57,7 @@ func create(t *testing.T, service categoriesService.CategoriesService, names []s
 func TestCategoriesServiceCreate(t *testing.T) {
 	categoriesService, db := getService()
 
-	createCategoryDto := categoriesDto.CreateCategoryDto{
+	createCategoryDto := categories.CreateCategoryDto{
 		Name: "mock category",
 	}
 
@@ -138,7 +137,7 @@ func TestCategoriesServiceUpdate(t *testing.T) {
 
 	assert.Equal(t, "old name", category.Name)
 
-	category, err := categoriesService.Update("1", categoriesDto.UpdateCategoryDto{
+	category, err := categoriesService.Update("1", categories.UpdateCategoryDto{
 		Name: "new name",
 	})
 

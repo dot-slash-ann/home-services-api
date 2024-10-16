@@ -1,28 +1,26 @@
-package UsersController
+package users
 
 import (
 	"errors"
 	"net/http"
 
-	UsersDto "github.com/dot-slash-ann/home-services-api/dtos/users"
 	"github.com/dot-slash-ann/home-services-api/lib"
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
-	"github.com/dot-slash-ann/home-services-api/services/users"
 	"github.com/gin-gonic/gin"
 )
 
 type UsersController struct {
-	userService users.UsersService
+	userService UsersService
 }
 
-func NewUsersController(service users.UsersService) *UsersController {
+func NewUsersController(service UsersService) *UsersController {
 	return &UsersController{
 		userService: service,
 	}
 }
 
 func (controller *UsersController) SignUp(c *gin.Context) {
-	var createUserDto UsersDto.CreateUserDto
+	var createUserDto CreateUserDto
 
 	if err := c.ShouldBind(&createUserDto); err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
@@ -43,12 +41,12 @@ func (controller *UsersController) SignUp(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"data": UsersDto.UserToJson(user),
+		"data": UserToJson(user),
 	})
 }
 
 func (controller *UsersController) Login(c *gin.Context) {
-	var loginUserDto UsersDto.LoginUserDto
+	var loginUserDto LoginUserDto
 
 	if err := c.ShouldBind(&loginUserDto); err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
@@ -74,7 +72,7 @@ func (controller *UsersController) Login(c *gin.Context) {
 	//
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": UsersDto.UserToJson(user),
+		"data": UserToJson(user),
 	})
 }
 
@@ -90,7 +88,7 @@ func (controller *UsersController) FindAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": UsersDto.ManyUsersToJson(users),
+		"data": ManyUsersToJson(users),
 	})
 }
 
@@ -124,6 +122,6 @@ func (controller *UsersController) FindOne(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": UsersDto.UserToJson(user),
+		"data": UserToJson(user),
 	})
 }

@@ -4,25 +4,23 @@ import (
 	"errors"
 	"net/http"
 
-	categoriesDto "github.com/dot-slash-ann/home-services-api/dtos/categories"
 	"github.com/dot-slash-ann/home-services-api/lib"
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
-	"github.com/dot-slash-ann/home-services-api/services/categories"
 	"github.com/gin-gonic/gin"
 )
 
 type CategoriesController struct {
-	categoriesService categories.CategoriesService
+	categoriesService CategoriesService
 }
 
-func NewCategoriesController(service categories.CategoriesService) *CategoriesController {
+func NewCategoriesController(service CategoriesService) *CategoriesController {
 	return &CategoriesController{
 		categoriesService: service,
 	}
 }
 
 func (controller *CategoriesController) Create(c *gin.Context) {
-	var createCategoryDto categoriesDto.CreateCategoryDto
+	var createCategoryDto CreateCategoryDto
 
 	if err := c.ShouldBind(&createCategoryDto); err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
@@ -34,7 +32,7 @@ func (controller *CategoriesController) Create(c *gin.Context) {
 
 	if category, err := controller.categoriesService.FindByName(createCategoryDto.Name); err == nil {
 		c.JSON(http.StatusConflict, gin.H{
-			"data": categoriesDto.CategoryToJson(category),
+			"data": CategoryToJson(category),
 		})
 		return
 	}
@@ -50,7 +48,7 @@ func (controller *CategoriesController) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"data": categoriesDto.CategoryToJson(category),
+		"data": CategoryToJson(category),
 	})
 }
 
@@ -66,7 +64,7 @@ func (controller *CategoriesController) FindAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": categoriesDto.ManyCategoriesToJson(categories),
+		"data": ManyCategoriesToJson(categories),
 	})
 }
 
@@ -100,7 +98,7 @@ func (controller *CategoriesController) FindOne(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": categoriesDto.CategoryToJson(category),
+		"data": CategoryToJson(category),
 	})
 }
 
@@ -123,7 +121,7 @@ func (controller *CategoriesController) Update(c *gin.Context) {
 		return
 	}
 
-	var updateCategoryDto categoriesDto.UpdateCategoryDto
+	var updateCategoryDto UpdateCategoryDto
 
 	if err := c.ShouldBind(&updateCategoryDto); err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
@@ -142,7 +140,7 @@ func (controller *CategoriesController) Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": categoriesDto.CategoryToJson(category),
+		"data": CategoryToJson(category),
 	})
 }
 
@@ -174,6 +172,6 @@ func (controller *CategoriesController) Delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": categoriesDto.CategoryToJson(category),
+		"data": CategoryToJson(category),
 	})
 }

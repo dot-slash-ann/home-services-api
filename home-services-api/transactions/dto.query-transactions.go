@@ -1,10 +1,10 @@
 package transactions
 
 import (
-	"github.com/dot-slash-ann/home-services-api/dtos/categories"
-	"github.com/dot-slash-ann/home-services-api/dtos/tags"
-	"github.com/dot-slash-ann/home-services-api/dtos/vendors"
+	"github.com/dot-slash-ann/home-services-api/categories"
 	"github.com/dot-slash-ann/home-services-api/entities"
+	"github.com/dot-slash-ann/home-services-api/tags"
+	"github.com/dot-slash-ann/home-services-api/vendors"
 	"github.com/gin-gonic/gin"
 )
 

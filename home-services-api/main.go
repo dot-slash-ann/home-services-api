@@ -3,21 +3,15 @@ package main
 import (
 	"time"
 
-	budgetsController "github.com/dot-slash-ann/home-services-api/controllers/budgets"
-	categoriesController "github.com/dot-slash-ann/home-services-api/controllers/categories"
-	tagsController "github.com/dot-slash-ann/home-services-api/controllers/tags"
-	transactionsController "github.com/dot-slash-ann/home-services-api/controllers/transactions"
-	usersController "github.com/dot-slash-ann/home-services-api/controllers/users"
-	vendorsController "github.com/dot-slash-ann/home-services-api/controllers/vendors"
+	"github.com/dot-slash-ann/home-services-api/budgets"
+	"github.com/dot-slash-ann/home-services-api/categories"
 	"github.com/dot-slash-ann/home-services-api/database"
 	"github.com/dot-slash-ann/home-services-api/initializers"
 	"github.com/dot-slash-ann/home-services-api/middleware"
-	"github.com/dot-slash-ann/home-services-api/services/budgets"
-	"github.com/dot-slash-ann/home-services-api/services/categories"
-	"github.com/dot-slash-ann/home-services-api/services/tags"
-	"github.com/dot-slash-ann/home-services-api/services/transactions"
-	"github.com/dot-slash-ann/home-services-api/services/users"
-	"github.com/dot-slash-ann/home-services-api/services/vendors"
+	"github.com/dot-slash-ann/home-services-api/tags"
+	"github.com/dot-slash-ann/home-services-api/transactions"
+	"github.com/dot-slash-ann/home-services-api/users"
+	"github.com/dot-slash-ann/home-services-api/vendors"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -42,7 +36,7 @@ func main() {
 	router.Use(middleware.ErrorHandler())
 
 	vendorsService := vendors.NewVendorsService(database.Connection)
-	vendorsController := vendorsController.NewVendorsController(vendorsService)
+	vendorsController := vendors.NewVendorsController(vendorsService)
 
 	router.POST("api/vendors", vendorsController.Create)
 	router.GET("api/vendors", vendorsController.FindAll)
@@ -51,7 +45,7 @@ func main() {
 	router.DELETE("api/vendors/:id", vendorsController.Delete)
 
 	categoriesService := categories.NewCategoriesService(database.Connection)
-	categoriesController := categoriesController.NewCategoriesController(categoriesService)
+	categoriesController := categories.NewCategoriesController(categoriesService)
 
 	router.POST("api/categories", categoriesController.Create)
 	router.GET("api/categories", categoriesController.FindAll)
@@ -60,7 +54,7 @@ func main() {
 	router.DELETE("api/categories/:id", categoriesController.Delete)
 
 	tagsService := tags.NewTagsService(database.Connection)
-	tagsController := tagsController.NewTagsController(tagsService)
+	tagsController := tags.NewTagsController(tagsService)
 
 	router.POST("api/tags", tagsController.Create)
 	router.GET("api/tags", tagsController.FindAll)
@@ -69,7 +63,7 @@ func main() {
 	router.DELETE("api/tags/:id", tagsController.Delete)
 
 	transactionsService := transactions.NewTransactionsService(database.Connection, categoriesService, tagsService, vendorsService)
-	transactionsController := transactionsController.NewTransactionsController(transactionsService)
+	transactionsController := transactions.NewTransactionsController(transactionsService)
 
 	router.POST("api/transactions", transactionsController.Create)
 	router.GET("api/transactions", transactionsController.FindAll)
@@ -79,7 +73,7 @@ func main() {
 	router.POST("api/transaction/:id/tag", transactionsController.TagTransaction)
 
 	budgetsService := budgets.NewBudgetsService(database.Connection, categoriesService)
-	budgetsController := budgetsController.NewBudgetsController(budgetsService)
+	budgetsController := budgets.NewBudgetsController(budgetsService)
 
 	router.POST("api/budgets", budgetsController.Create)
 	router.GET("api/budgets", budgetsController.FindAll)
@@ -88,7 +82,7 @@ func main() {
 	router.POST("api/budgets/:id/category", budgetsController.AddCategory)
 
 	usersService := users.NewUsersService(database.Connection)
-	usersController := usersController.NewUsersController(usersService)
+	usersController := users.NewUsersController(usersService)
 
 	router.POST("api/signup", usersController.SignUp)
 	router.POST("api/login", usersController.Login)

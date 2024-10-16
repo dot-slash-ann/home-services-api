@@ -1,17 +1,16 @@
 package vendors
 
 import (
-	vendorsDto "github.com/dot-slash-ann/home-services-api/dtos/vendors"
 	"github.com/dot-slash-ann/home-services-api/entities"
 	"gorm.io/gorm"
 )
 
 type VendorsService interface {
-	Create(vendorsDto.CreateVendorDto) (entities.Vendor, error)
+	Create(CreateVendorDto) (entities.Vendor, error)
 	FindAll() ([]entities.Vendor, error)
 	FindOne(string) (entities.Vendor, error)
 	FindByName(string) (entities.Vendor, error)
-	Update(string, vendorsDto.UpdateVendorDto) (entities.Vendor, error)
+	Update(string, UpdateVendorDto) (entities.Vendor, error)
 	Delete(string) (entities.Vendor, error)
 }
 
@@ -25,7 +24,7 @@ func NewVendorsService(database *gorm.DB) *VendorsServiceImpl {
 	}
 }
 
-func (service *VendorsServiceImpl) Create(createVendorDto vendorsDto.CreateVendorDto) (entities.Vendor, error) {
+func (service *VendorsServiceImpl) Create(createVendorDto CreateVendorDto) (entities.Vendor, error) {
 	vendor := entities.Vendor{
 		Name: createVendorDto.Name,
 	}
@@ -67,7 +66,7 @@ func (service *VendorsServiceImpl) FindByName(name string) (entities.Vendor, err
 	return vendor, nil
 }
 
-func (service *VendorsServiceImpl) Update(id string, updateVendorDto vendorsDto.UpdateVendorDto) (entities.Vendor, error) {
+func (service *VendorsServiceImpl) Update(id string, updateVendorDto UpdateVendorDto) (entities.Vendor, error) {
 	var vendor entities.Vendor
 
 	updatedVendor := entities.Vendor{

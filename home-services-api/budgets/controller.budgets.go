@@ -1,30 +1,28 @@
-package vendors
+package budgets
 
 import (
 	"errors"
 	"net/http"
 
-	vendorsDto "github.com/dot-slash-ann/home-services-api/dtos/vendors"
 	"github.com/dot-slash-ann/home-services-api/lib"
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
-	"github.com/dot-slash-ann/home-services-api/services/vendors"
 	"github.com/gin-gonic/gin"
 )
 
-type VendorsController struct {
-	vendorsService vendors.VendorsService
+type BudgetsController struct {
+	budgetsService BudgetsService
 }
 
-func NewVendorsController(service vendors.VendorsService) *VendorsController {
-	return &VendorsController{
-		vendorsService: service,
+func NewBudgetsController(service BudgetsService) *BudgetsController {
+	return &BudgetsController{
+		budgetsService: service,
 	}
 }
 
-func (controller *VendorsController) Create(c *gin.Context) {
-	var createVendorDto vendorsDto.CreateVendorDto
+func (controller *BudgetsController) Create(c *gin.Context) {
+	var createBudgetDto CreateBudgetDto
 
-	if err := c.ShouldBind(&createVendorDto); err != nil {
+	if err := c.ShouldBind(&createBudgetDto); err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
 
 		c.Error(httpErr)
@@ -32,7 +30,7 @@ func (controller *VendorsController) Create(c *gin.Context) {
 		return
 	}
 
-	vendor, err := controller.vendorsService.Create(createVendorDto)
+	budget, err := controller.budgetsService.Create(createBudgetDto)
 
 	if err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
@@ -43,12 +41,12 @@ func (controller *VendorsController) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"data": vendorsDto.VendorToJson(vendor),
+		"data": BudgetToJson(budget),
 	})
 }
 
-func (controller *VendorsController) FindAll(c *gin.Context) {
-	vendors, err := controller.vendorsService.FindAll()
+func (controller *BudgetsController) FindAll(c *gin.Context) {
+	budgets, err := controller.budgetsService.FindAll()
 
 	if err != nil {
 		httpErr := httpErrors.InternalServerError(err, nil)
@@ -59,11 +57,11 @@ func (controller *VendorsController) FindAll(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": vendorsDto.ManyVendorsToJson(vendors),
+		"data": ManyBudgetsToJson(budgets),
 	})
 }
 
-func (controller *VendorsController) FindOne(c *gin.Context) {
+func (controller *BudgetsController) FindOne(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -82,7 +80,7 @@ func (controller *VendorsController) FindOne(c *gin.Context) {
 		return
 	}
 
-	vendor, err := controller.vendorsService.FindOne(id)
+	budget, err := controller.budgetsService.FindOne(id)
 
 	if err != nil {
 		httpErr := httpErrors.NotFoundError(err, nil)
@@ -93,11 +91,11 @@ func (controller *VendorsController) FindOne(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": vendorsDto.VendorToJson(vendor),
+		"data": BudgetToJson(budget),
 	})
 }
 
-func (controller *VendorsController) Update(c *gin.Context) {
+func (controller *BudgetsController) Delete(c *gin.Context) {
 	id, found := c.Params.Get("id")
 
 	if !found {
@@ -116,9 +114,43 @@ func (controller *VendorsController) Update(c *gin.Context) {
 		return
 	}
 
-	var updateVendorDto vendorsDto.UpdateVendorDto
+	budget, err := controller.budgetsService.Delete(id)
 
-	if err := c.ShouldBind(&updateVendorDto); err != nil {
+	if err != nil {
+		httpErr := httpErrors.NotFoundError(err, nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": BudgetToJson(budget),
+	})
+}
+
+func (controller *BudgetsController) AddCategory(c *gin.Context) {
+	id, found := c.Params.Get("id")
+
+	if !found {
+		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	if !lib.IsNumeric(id) {
+		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
+
+		c.Error(httpErr)
+
+		return
+	}
+
+	var addCategoryDto AddCategoryDto
+
+	if err := c.ShouldBind(&addCategoryDto); err != nil {
 		httpErr := httpErrors.BadRequestError(err, nil)
 
 		c.Error(httpErr)
@@ -126,47 +158,17 @@ func (controller *VendorsController) Update(c *gin.Context) {
 		return
 	}
 
-	vendor, err := controller.vendorsService.Update(id, updateVendorDto)
+	budget, err := controller.budgetsService.AddCategory(addCategoryDto, id)
 
 	if err != nil {
-		lib.HandleError(c, http.StatusNotFound, err)
-
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"data": vendorsDto.VendorToJson(vendor),
-	})
-}
-
-func (controller *VendorsController) Delete(c *gin.Context) {
-	id, found := c.Params.Get("id")
-
-	if !found {
-		httpErr := httpErrors.BadRequestError(errors.New("id arg not found"), nil)
+		httpErr := httpErrors.InternalServerError(err, nil)
 
 		c.Error(httpErr)
 
 		return
 	}
 
-	if !lib.IsNumeric(id) {
-		httpErr := httpErrors.BadRequestError(errors.New("id must be an integer"), nil)
-
-		c.Error(httpErr)
-
-		return
-	}
-
-	vendor, err := controller.vendorsService.Delete(id)
-
-	if err != nil {
-		lib.HandleError(c, http.StatusNotFound, err)
-
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{
-		"data": vendorsDto.VendorToJson(vendor),
+		"data": BudgetToJson(budget),
 	})
 }

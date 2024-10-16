@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dot-slash-ann/home-services-api/lib/httpErrors"
-	"github.com/dot-slash-ann/home-services-api/services/users"
+	"github.com/dot-slash-ann/home-services-api/users"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )

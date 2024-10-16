@@ -3,16 +3,15 @@ package tags
 import (
 	"log"
 
-	tagsDto "github.com/dot-slash-ann/home-services-api/dtos/tags"
 	"github.com/dot-slash-ann/home-services-api/entities"
 	"gorm.io/gorm"
 )
 
 type TagsService interface {
-	Create(tagsDto.CreateTagDto) (entities.Tag, error)
+	Create(CreateTagDto) (entities.Tag, error)
 	FindAll() ([]entities.Tag, error)
 	FindOne(string) (entities.Tag, error)
-	Update(string, tagsDto.UpdateTagDto) (entities.Tag, error)
+	Update(string, UpdateTagDto) (entities.Tag, error)
 	Delete(string) (entities.Tag, error)
 	FindOneOrCreate(string) (entities.Tag, error)
 }
@@ -27,7 +26,7 @@ func NewTagsService(database *gorm.DB) *TagsServiceImpl {
 	}
 }
 
-func (service *TagsServiceImpl) Create(createTagDto tagsDto.CreateTagDto) (entities.Tag, error) {
+func (service *TagsServiceImpl) Create(createTagDto CreateTagDto) (entities.Tag, error) {
 	tag := entities.Tag{
 		Name: createTagDto.Name,
 	}
@@ -71,7 +70,7 @@ func (service *TagsServiceImpl) FindOneOrCreate(name string) (entities.Tag, erro
 	return tag, nil
 }
 
-func (service *TagsServiceImpl) Update(id string, updateTagDto tagsDto.UpdateTagDto) (entities.Tag, error) {
+func (service *TagsServiceImpl) Update(id string, updateTagDto UpdateTagDto) (entities.Tag, error) {
 	var tag entities.Tag
 
 	if result := service.database.First(&tag, id); result.Error != nil {

@@ -1,19 +1,18 @@
 package budgets
 
 import (
-	"github.com/dot-slash-ann/home-services-api/dtos/budgets"
+	"github.com/dot-slash-ann/home-services-api/categories"
 	"github.com/dot-slash-ann/home-services-api/entities"
-	"github.com/dot-slash-ann/home-services-api/services/categories"
 	"gorm.io/gorm"
 )
 
 type BudgetsService interface {
-	Create(budgets.CreateBudgetDto) (entities.Budget, error)
+	Create(CreateBudgetDto) (entities.Budget, error)
 	FindAll() ([]entities.Budget, error)
 	FindOne(string) (entities.Budget, error)
 	FindByName(string) (entities.Budget, error)
 	Delete(string) (entities.Budget, error)
-	AddCategory(budgets.AddCategoryDto, string) (entities.Budget, error)
+	AddCategory(AddCategoryDto, string) (entities.Budget, error)
 }
 
 type BudgetsServiceImpl struct {
@@ -28,7 +27,7 @@ func NewBudgetsService(database *gorm.DB, categoriesService categories.Categorie
 	}
 }
 
-func (service *BudgetsServiceImpl) Create(createBudgetDto budgets.CreateBudgetDto) (entities.Budget, error) {
+func (service *BudgetsServiceImpl) Create(createBudgetDto CreateBudgetDto) (entities.Budget, error) {
 	budget := entities.Budget{
 		Name: createBudgetDto.Name,
 	}
@@ -84,7 +83,7 @@ func (service *BudgetsServiceImpl) Delete(id string) (entities.Budget, error) {
 	return budget, nil
 }
 
-func (service *BudgetsServiceImpl) AddCategory(addCategoryDto budgets.AddCategoryDto, id string) (entities.Budget, error) {
+func (service *BudgetsServiceImpl) AddCategory(addCategoryDto AddCategoryDto, id string) (entities.Budget, error) {
 	var budget entities.Budget
 
 	if results := service.database.Preload("Categories").First(&budget, id); results.Error != nil {
