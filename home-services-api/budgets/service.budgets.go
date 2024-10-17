@@ -1,7 +1,6 @@
 package budgets
 
 import (
-	"github.com/dot-slash-ann/home-services-api/categories"
 	"github.com/dot-slash-ann/home-services-api/entities"
 	"gorm.io/gorm"
 )
@@ -11,19 +10,17 @@ type BudgetsService interface {
 	FindAll() ([]entities.Budget, error)
 	FindOne(string) (entities.Budget, error)
 	FindByName(string) (entities.Budget, error)
+	Update(string, UpdateBudgetDto) (entities.Budget, error)
 	Delete(string) (entities.Budget, error)
-	AddCategory(AddCategoryDto, string) (entities.Budget, error)
 }
 
 type BudgetsServiceImpl struct {
-	database          *gorm.DB
-	categoriesService categories.CategoriesService
+	database *gorm.DB
 }
 
-func NewBudgetsService(database *gorm.DB, categoriesService categories.CategoriesService) *BudgetsServiceImpl {
+func NewBudgetsService(database *gorm.DB) *BudgetsServiceImpl {
 	return &BudgetsServiceImpl{
-		database:          database,
-		categoriesService: categoriesService,
+		database: database,
 	}
 }
 
@@ -42,8 +39,8 @@ func (service *BudgetsServiceImpl) Create(createBudgetDto CreateBudgetDto) (enti
 func (service *BudgetsServiceImpl) FindAll() ([]entities.Budget, error) {
 	var budgetsList []entities.Budget
 
-	if results := service.database.Preload("Categories").Find(&budgetsList); results.Error != nil {
-		return []entities.Budget{}, results.Error
+	if result := service.database.Find(&budgetsList); result.Error != nil {
+		return []entities.Budget{}, result.Error
 	}
 
 	return budgetsList, nil
@@ -52,8 +49,8 @@ func (service *BudgetsServiceImpl) FindAll() ([]entities.Budget, error) {
 func (service *BudgetsServiceImpl) FindOne(id string) (entities.Budget, error) {
 	var budget entities.Budget
 
-	if results := service.database.Preload("Categories").First(&budget, id); results.Error != nil {
-		return entities.Budget{}, results.Error
+	if result := service.database.First(&budget, id); result.Error != nil {
+		return entities.Budget{}, result.Error
 	}
 
 	return budget, nil
@@ -62,42 +59,40 @@ func (service *BudgetsServiceImpl) FindOne(id string) (entities.Budget, error) {
 func (service *BudgetsServiceImpl) FindByName(name string) (entities.Budget, error) {
 	var budget entities.Budget
 
-	if results := service.database.Preload("Categories").First(&budget, "name = ?", name); results.Error != nil {
-		return entities.Budget{}, results.Error
+	if result := service.database.First(&budget, "name = ?", name); result.Error != nil {
+		return entities.Budget{}, result.Error
+	}
+
+	return budget, nil
+}
+
+func (service *BudgetsServiceImpl) Update(id string, updateBudgetDto UpdateBudgetDto) (entities.Budget, error) {
+	var budget entities.Budget
+
+	updatedBudget := entities.Budget{
+		Name: updateBudgetDto.Name,
+	}
+
+	if result := service.database.First(&budget, id); result.Error != nil {
+		return entities.Budget{}, result.Error
+	}
+
+	if result := service.database.Model(&budget).Updates(updatedBudget); result.Error != nil {
+		return entities.Budget{}, result.Error
 	}
 
 	return budget, nil
 }
 
 func (service *BudgetsServiceImpl) Delete(id string) (entities.Budget, error) {
-	budget, err := service.FindOne(id)
-
-	if err != nil {
-		return entities.Budget{}, err
-	}
-
-	if results := service.database.Delete(&entities.Budget{}, id); results.Error != nil {
-		return entities.Budget{}, results.Error
-	}
-
-	return budget, nil
-}
-
-func (service *BudgetsServiceImpl) AddCategory(addCategoryDto AddCategoryDto, id string) (entities.Budget, error) {
 	var budget entities.Budget
 
-	if results := service.database.Preload("Categories").First(&budget, id); results.Error != nil {
-		return entities.Budget{}, results.Error
+	if result := service.database.First(&budget, id); result.Error != nil {
+		return entities.Budget{}, result.Error
 	}
 
-	category, err := service.categoriesService.FindByName(addCategoryDto.CategoryName)
-
-	if err != nil {
-		return entities.Budget{}, err
-	}
-
-	if err := service.database.Model(&budget).Association("Categories").Append(&category); err != nil {
-		return entities.Budget{}, err
+	if result := service.database.Delete(&entities.Budget{}, id); result.Error != nil {
+		return entities.Budget{}, result.Error
 	}
 
 	return budget, nil

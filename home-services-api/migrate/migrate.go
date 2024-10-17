@@ -18,7 +18,7 @@ func main() {
 	database.Connection.AutoMigrate(&entities.Transaction{})
 
 	database.Connection.AutoMigrate(&entities.Budget{})
-	database.Connection.AutoMigrate(&entities.BudgetCategory{})
+	// database.Connection.AutoMigrate(&entities.BudgetCategory{})
 
 	database.Connection.AutoMigrate(&entities.User{})
 }

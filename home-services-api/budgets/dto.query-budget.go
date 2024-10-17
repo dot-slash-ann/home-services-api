@@ -1,16 +1,14 @@
 package budgets
 
 import (
-	"github.com/dot-slash-ann/home-services-api/categories"
 	"github.com/dot-slash-ann/home-services-api/entities"
 	"github.com/gin-gonic/gin"
 )
 
 func BudgetToJson(budget entities.Budget) gin.H {
 	return gin.H{
-		"id":         budget.ID,
-		"name":       budget.Name,
-		"categories": categories.ManyCategoriesToJson(budget.Categories),
+		"id":   budget.ID,
+		"name": budget.Name,
 	}
 }
 
